@@ -10,7 +10,7 @@ class Conv1(nn.Module):
         self.conv2 = nn.Conv3d(64, 128, kernel_size=(3, 3, 3), stride=(2, 1, 1))
         self.dense1 = Dense1(16384)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.permute(0, 2, 1, 3, 4)
         x = self.conv1(x)
         x = self.conv2(x)
@@ -26,7 +26,7 @@ class Conv3(nn.Module):
         self.conv2 = nn.Conv3d(64, 128, kernel_size=(3, 3, 3), stride=(2, 1, 1))
         self.dense3 = Dense3(16384)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.permute(0, 2, 1, 3, 4)
         x = self.conv1(x)
         x = self.conv2(x)
@@ -42,7 +42,7 @@ class Conv6(nn.Module):
         self.conv2 = nn.Conv3d(64, 128, kernel_size=(3, 3, 3), stride=(2, 1, 1))
         self.dense6 = Dense6(16384)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.permute(0, 2, 1, 3, 4)
         x = self.conv1(x)
         x = self.conv2(x)

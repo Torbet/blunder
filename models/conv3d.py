@@ -12,7 +12,7 @@ class Conv3D(nn.Module):
         self.l1 = nn.Linear(512, 128)
         self.l2 = nn.Linear(128, 2)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = self.pool(x)

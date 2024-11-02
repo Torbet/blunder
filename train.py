@@ -9,31 +9,32 @@ import matplotlib.pyplot as plt
 # models
 from models.dense import Dense1, Dense3, Dense6  # stanford paper
 from models.conv import Conv1, Conv3, Conv6  # stanford paper
-from models.conv_lstm import ConvLSTM
+from models.conv_lstm import ConvLSTM, ConvLSTMExtra
 from models.conv3d import Conv3D
 
 # parameters
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
-epochs = 30
+epochs = 20
 limit = 5000
-data_path = f"data/processed/{limit}.npz"
+data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
 
 
 # dataset
 class Dataset(data.Dataset):
-    def __init__(self, path: str):
-        self.data = np.load(path)
-        self.moves = self.data["moves"].astype(np.float32)
-        self.labels = self.data["labels"].astype(np.float32)
+    def __init__(self, dir: str):
+        self.moves = np.load(f"{dir}/moves.npy").astype(np.float32)
+        self.evals = np.load(f"{dir}/evals.npy").astype(np.float32)
+        self.times = np.nan_to_num(np.load(f"{dir}/times.npy").astype(np.float32))
+        self.labels = np.load(f"{dir}/labels.npy").astype(np.float32)
 
     def __len__(self):
         return self.moves.shape[0]
 
     def __getitem__(self, idx):
-        return self.moves[idx], self.labels[idx]
+        return self.moves[idx], self.evals[idx], self.times[idx], self.labels[idx]
 
 
 def load_data(path: str):
@@ -67,10 +68,15 @@ def train(model: nn.Module, train_loader: data.DataLoader, val_loader: data.Data
         # train
         model.train()
         epoch_loss = 0
-        for moves, labels in train_loader:
-            moves, labels = moves.to(device), labels.to(device)
+        for moves, evals, times, labels in train_loader:
+            moves, evals, times, labels = (
+                moves.to(device),
+                evals.to(device),
+                times.to(device),
+                labels.to(device),
+            )
             optimizer.zero_grad()
-            predicted = model(moves)
+            predicted = model(moves, evals, times)
             loss = criterion(predicted, labels)
             loss.backward()
             optimizer.step()
@@ -93,16 +99,21 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
-        for moves, labels in loader:
-            moves, labels = moves.to(device), labels.to(device)
-            predicted = torch.round(model(moves))
+        for moves, evals, times, labels in loader:
+            moves, evals, times, labels = (
+                moves.to(device),
+                evals.to(device),
+                times.to(device),
+                labels.to(device),
+            )
+            predicted = torch.round(model(moves, evals, times))
             correct += (predicted == labels).all(dim=1).sum().item()
             total += labels.size(0)
     return correct / total
 
 
 if __name__ == "__main__":
-    model = Dense1().to(device)
+    model = ConvLSTMExtra().to(device)
     model_name = model.__class__.__name__
     print(model_name, "\n")
     train_loader, val_loader, test_loader = load_data(data_path)

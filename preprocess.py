@@ -1,9 +1,12 @@
 import chess
 import numpy as np
 import chess.pgn
+import os
+import shutil
+from helpers.evaluate import evaluate_stockfish, evaluate_lazy
 
 # parameters
-limit = 5000
+limit = 1000
 years = [2023, 2022, 2021]
 modes = ["HvH", "HvC", "CvC"]
 num_moves = 40
@@ -12,6 +15,8 @@ elo_range = (1800, 2200)
 
 def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
     moves = np.zeros((4 * limit, num_moves, 6, 8, 8))
+    evals = np.zeros((4 * limit, num_moves))
+    times = np.zeros((4 * limit, num_moves))
     labels = np.zeros((4 * limit, 2))
 
     count = 0
@@ -70,7 +75,7 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
                     continue
 
                 # parse
-                moves[count] = parse_game(game)
+                moves[count], evals[count], times[count] = parse_game(game)
                 labels[count] = label
 
                 # iterate
@@ -79,24 +84,28 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
                 print(count, counts)
                 game = chess.pgn.read_game(file)
 
-    return moves, labels
+    return moves, evals, times, labels
 
 
 def parse_game(game: chess.pgn.Game) -> np.ndarray:
     moves = np.zeros((num_moves, 6, 8, 8))
+    evals = np.zeros(num_moves)
+    times = np.zeros(num_moves)
 
     board = game.board()
-    for i, move in enumerate(game.mainline_moves()):
+    for i, node in enumerate(game.mainline()):
         # stop after num_moves moves
         if i == num_moves + 10:
             break
-        board.push(move)
+        board.push(node.move)
         # skip first 10 moves
         if i < 10:
             continue
         moves[i - 10] = parse_board(board)
+        evals[i - 10] = evaluate_stockfish(board)
+        times[i - 10] = node.emt()
 
-    return moves
+    return moves, evals, times
 
 
 def parse_board(board: chess.Board) -> np.ndarray:
@@ -114,9 +123,17 @@ def parse_board(board: chess.Board) -> np.ndarray:
 
 if __name__ == "__main__":
     paths = [f"data/raw/{year}_{mode}.pgn" for year in years for mode in modes]
-    output_path = f"data/processed/{limit}.npz"
+    output = f"data/processed/{limit}"
+    if os.path.exists(output):
+        shutil.rmtree(output)
+    os.makedirs(output)
 
-    moves, labels = parse_files(paths)
+    moves, evals, times, labels = parse_files(paths)
+    print("evals", evals, "\n\n")
+    print("times", times, "\n\n")
+    np.save(f"{output}/moves.npy", moves)
+    np.save(f"{output}/evals.npy", evals)
+    np.save(f"{output}/times.npy", times)
+    np.save(f"{output}/labels.npy", labels)
 
-    np.savez(output_path, moves=moves, labels=labels)
-    print(f"Saved to {output_path}")
+    print(f"Saved to {output}")

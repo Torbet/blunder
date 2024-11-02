@@ -9,7 +9,7 @@ class Dense1(nn.Module):
         self.l1 = nn.Linear(in_features, 512)
         self.l2 = nn.Linear(512, 2)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = self.l2(x)
@@ -25,7 +25,7 @@ class Dense3(nn.Module):
         self.l3 = nn.Linear(512, 64)
         self.l4 = nn.Linear(64, 2)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = F.relu(self.l2(x))
@@ -46,7 +46,7 @@ class Dense6(nn.Module):
         self.l6 = nn.Linear(128, 128)
         self.l7 = nn.Linear(128, 2)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = F.relu(self.l2(x))
