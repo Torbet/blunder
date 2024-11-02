@@ -120,9 +120,9 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 | **Conv3D**        |      |       | 75.2  |
 | **ConvLSTMExtra** |      | 84.9  | 87.98 |
 
-ConvLSTM 30 epochs 78.5%
-ConvLSTM 40 epochs 78.67%
-ConvLSTMExtra 30 epochs 88.58%
+- ConvLSTM 30 epochs 78.5%
+- ConvLSTM 40 epochs 78.67%
+- ConvLSTMExtra 30 epochs 88.58%
 
 ### Stanford Results
 
@@ -167,10 +167,6 @@ Can use reinforcement learning to maximise the chances of creating positions tha
 Can use already trained models for this.
 
 Identify critical positions: analyse past chess games, identifying types of positions where humans tend to make mistakes or play sub-optimally, but computers handle well - can be used as target states.
-
-List((0,List((Drama,8.0), (Action,7.0), (Comedy,7.0))), (1,List((Comedy,9.0), (Drama,9.0), (Action,6.5))), (2,List((Action,8.5), (Drama,8.5), (Comedy,7.5))))
-
-List((0,List((Drama,8.0), (Action,7.0), (Comedy,7.0))), (1,List((Drama,9.0), (Comedy,9.0), (Action,6.5))), (2,List((Drama,8.5), (Action,8.5), (Comedy,7.5))))
 
 ### References
 
