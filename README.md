@@ -186,5 +186,5 @@ Identify critical positions: analyse past chess games, identifying types of posi
 - [Grandmaster-Level Chess Without Search](https://arxiv.org/abs/2402.04494)
 - [How the Chess.com Cheat Detection Engine actually works](https://www.youtube.com/watch?v=oTJasAHdu6M)
 - [Cheating in Chess wikipedia](https://en.wikipedia.org/wiki/Cheating_in_chess)
-  - [Open Spiel](https://github.com/google-deepmind/open_spiel)
+- [Open Spiel](https://github.com/google-deepmind/open_spiel)
 - [AlphaZero](https://www.chessprogramming.org/AlphaZero)
