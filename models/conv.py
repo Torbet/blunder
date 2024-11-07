@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from models.dense import Dense1, Dense3, Dense6
 
 
@@ -16,7 +17,7 @@ class Conv1(nn.Module):
         x = self.conv2(x)
         x = x.view(x.size(0), -1)
         x = self.dense1(x)
-        return x
+        return F.softmax(x, dim=1)
 
 
 class Conv3(nn.Module):
@@ -32,7 +33,7 @@ class Conv3(nn.Module):
         x = self.conv2(x)
         x = x.view(x.size(0), -1)
         x = self.dense3(x)
-        return x
+        return F.softmax(x, dim=1)
 
 
 class Conv6(nn.Module):
@@ -48,4 +49,4 @@ class Conv6(nn.Module):
         x = self.conv2(x)
         x = x.view(x.size(0), -1)
         x = self.dense6(x)
-        return x
+        return F.softmax(x, dim=1)

@@ -10,7 +10,7 @@ class ConvLSTM(nn.Module):
         self.conv2 = nn.Conv2d(64, 128, kernel_size=3)
         self.conv3 = nn.Conv2d(128, 256, kernel_size=3)
         self.lstm = nn.LSTM(1024, 256, batch_first=True)
-        self.l1 = nn.Linear(256, 2)
+        self.l1 = nn.Linear(256, 4)
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         bs, ts, C, H, W = x.size()
@@ -36,7 +36,7 @@ class ConvLSTMExtra(nn.Module):
         self.conv2 = nn.Conv2d(64, 128, kernel_size=3)
         self.conv3 = nn.Conv2d(128, 256, kernel_size=3)
         self.lstm = nn.LSTM(1026, 256, batch_first=True)
-        self.l1 = nn.Linear(256, 2)
+        self.l1 = nn.Linear(256, 4)
 
     def forward(
         self, board: torch.Tensor, evals: torch.Tensor, times: torch.Tensor

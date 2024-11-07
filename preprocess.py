@@ -4,9 +4,10 @@ import chess.pgn
 import os
 import shutil
 from helpers.evaluate import evaluate_stockfish, evaluate_lazy
+from helpers.encode import onehot
 
 # parameters
-limit = 1000
+limit = 10
 years = [2023, 2022, 2021]
 modes = ["HvH", "HvC", "CvC"]
 num_moves = 40
@@ -17,10 +18,10 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
     moves = np.zeros((4 * limit, num_moves, 6, 8, 8))
     evals = np.zeros((4 * limit, num_moves))
     times = np.zeros((4 * limit, num_moves))
-    labels = np.zeros((4 * limit, 2))
+    labels = np.zeros((4 * limit, 4))
 
     count = 0
-    counts = {(0, 0): 0, (0, 1): 0, (1, 1): 0, (1, 0): 0}
+    counts = {0: 0, 1: 0, 2: 0, 3: 0}
 
     for path in paths:
         print(path)
@@ -38,30 +39,26 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
                 black_elo = int(headers.get("BlackElo", 0))
                 ply_count = int(headers.get("PlyCount", 0))
 
-                """
-                HvH: (0, 0)
-                HvC: (0, 1), (1, 0)
-                CvC: (1, 1)
-                """
-                label = (white_comp, black_comp)
+                # 0: HvH, 1: CvH, 2: HvC, 3: CvC
+                label, mapping = onehot(white_comp, black_comp)
 
                 if "HvH" in path:
-                    if label != (0, 0):
+                    if mapping != 0:
                         continue
-                    if counts[(0, 0)] >= limit:
+                    if counts[mapping] >= limit:
                         break
                 if "HvC" in path:
-                    if label not in [(0, 1), (1, 0)]:
+                    if mapping not in [1, 2]:
                         continue
-                    if counts[(0, 1)] >= limit and counts[(1, 0)] >= limit:
+                    if counts[1] >= limit and counts[2] >= limit:
                         break
                 if "CvC" in path:
-                    if label != (1, 1):
+                    if mapping != 3:
                         continue
-                    if counts[label] >= limit:
+                    if counts[3] >= limit:
                         break
 
-                if counts[label] >= limit:
+                if counts[mapping] >= limit:
                     continue
 
                 # filter
@@ -80,7 +77,7 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
 
                 # iterate
                 count += 1
-                counts[label] += 1
+                counts[mapping] += 1
                 print(count, counts)
                 game = chess.pgn.read_game(file)
 

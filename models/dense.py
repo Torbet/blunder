@@ -7,14 +7,13 @@ class Dense1(nn.Module):
     def __init__(self, in_features: int = 15360):
         super(Dense1, self).__init__()
         self.l1 = nn.Linear(in_features, 512)
-        self.l2 = nn.Linear(512, 2)
+        self.l2 = nn.Linear(512, 4)
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = self.l2(x)
-        x = F.sigmoid(x)
-        return x
+        return F.softmax(x, dim=1)
 
 
 class Dense3(nn.Module):
@@ -23,7 +22,7 @@ class Dense3(nn.Module):
         self.l1 = nn.Linear(in_features, 512)
         self.l2 = nn.Linear(512, 512)
         self.l3 = nn.Linear(512, 64)
-        self.l4 = nn.Linear(64, 2)
+        self.l4 = nn.Linear(64, 4)
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.view(x.size(0), -1)
@@ -31,8 +30,7 @@ class Dense3(nn.Module):
         x = F.relu(self.l2(x))
         x = F.relu(self.l3(x))
         x = self.l4(x)
-        x = F.sigmoid(x)
-        return x
+        return F.softmax(x, dim=1)
 
 
 class Dense6(nn.Module):
@@ -44,7 +42,7 @@ class Dense6(nn.Module):
         self.l4 = nn.Linear(512, 512)
         self.l5 = nn.Linear(512, 128)
         self.l6 = nn.Linear(128, 128)
-        self.l7 = nn.Linear(128, 2)
+        self.l7 = nn.Linear(128, 4)
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.view(x.size(0), -1)
@@ -55,5 +53,4 @@ class Dense6(nn.Module):
         x = F.relu(self.l5(x))
         x = F.relu(self.l6(x))
         x = self.l7(x)
-        x = F.sigmoid(x)
-        return x
+        return F.softmax(x, dim=1)

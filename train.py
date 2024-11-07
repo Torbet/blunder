@@ -17,7 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
 epochs = 20
-limit = 5000
+limit = 10
 data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
 
@@ -59,7 +59,7 @@ def load_data(path: str):
 
 
 def train(model: nn.Module, train_loader: data.DataLoader, val_loader: data.DataLoader):
-    criterion = nn.BCELoss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     losses, accuracies = [], []
@@ -113,7 +113,7 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
 
 
 if __name__ == "__main__":
-    model = ConvLSTMExtra().to(device)
+    model = Dense1().to(device)
     model_name = model.__class__.__name__
     print(model_name, "\n")
     train_loader, val_loader, test_loader = load_data(data_path)

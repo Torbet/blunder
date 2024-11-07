@@ -10,7 +10,7 @@ class Conv3D(nn.Module):
         self.conv2 = nn.Conv3d(64, 128, kernel_size=(3, 3, 3))
         self.pool = nn.MaxPool3d(kernel_size=(2, 2, 2))
         self.l1 = nn.Linear(512, 128)
-        self.l2 = nn.Linear(128, 2)
+        self.l2 = nn.Linear(128, 4)
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = F.relu(self.conv1(x))
@@ -19,4 +19,4 @@ class Conv3D(nn.Module):
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = self.l2(x)
-        return F.sigmoid(x)
+        return F.softmax(x, dim=1)
