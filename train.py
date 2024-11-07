@@ -106,9 +106,10 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
                 times.to(device),
                 labels.to(device),
             )
-            predicted = torch.round(model(moves, evals, times))
-            correct += (predicted == labels).all(dim=1).sum().item()
+            predicted = model(moves, evals, times)
+            _, predicted = torch.max(predicted, 1)
             total += labels.size(0)
+            correct += (predicted == labels).sum().item()
     return correct / total
 
 
