@@ -13,8 +13,8 @@ class Conv1(nn.Module):
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.permute(0, 2, 1, 3, 4)
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         x = x.view(x.size(0), -1)
         x = self.dense1(x)
         return x
@@ -29,8 +29,8 @@ class Conv3(nn.Module):
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.permute(0, 2, 1, 3, 4)
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         x = x.view(x.size(0), -1)
         x = self.dense3(x)
         return x
@@ -45,8 +45,8 @@ class Conv6(nn.Module):
 
     def forward(self, x: torch.Tensor, *args: list[torch.Tensor]) -> torch.Tensor:
         x = x.permute(0, 2, 1, 3, 4)
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         x = x.view(x.size(0), -1)
         x = self.dense6(x)
         return x
