@@ -106,19 +106,22 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 
 ### Test Results
 
+![[Figure_1.png]]
 20 epochs at different datasizes
 
-|                   | 1000 | 5000  | 10000 |
-| ----------------- | ---- | ----- | ----- |
-| **Dense1**        |      | 71.05 | 76.15 |
-| **Dense3**        |      | 72.9  | 76.1  |
-| **Dense6**        |      | 74.35 | 77.18 |
-| **Conv1**         |      | 71.05 | 74.15 |
-| **Conv3**         |      | 72.45 | 75.15 |
-| **Conv6**         |      | 73.2  | 76.3  |
-| **ConvLSTM**      |      | 74.05 | 77.72 |
-| **Conv3D**        |      |       | 75.2  |
-| **ConvLSTMExtra** |      | 84.9  | 87.98 |
+|                      | 1000 | 5000  | 10000 |
+| -------------------- | ---- | ----- | ----- |
+| **Dense1**           |      | 71.05 | 76.15 |
+| **Dense3**           |      | 72.9  | 76.1  |
+| **Dense6**           |      | 74.35 | 77.18 |
+| **Conv1**            |      | 71.05 | 74.15 |
+| **Conv3**            |      | 72.45 | 75.15 |
+| **Conv6**            |      | 73.2  | 76.3  |
+| **ConvLSTM**         |      | 74.05 | 77.72 |
+| **Conv3D**           |      |       | 75.2  |
+| **ConvLSTMExtra**    |      | 84.9  | 87.98 |
+| **Shit Transformer** |      |       | 77.03 |
+| **TranformerExtra**  |      |       | 83.38 |
 
 - ConvLSTM 30 epochs 78.5%
 - ConvLSTM 40 epochs 78.67%
@@ -156,6 +159,11 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 
 > Let's say we are playing a coin flip game. If the coin lands heads, I pay you $1; if tails, you pay me $1. We do this 100 times. If it is a fair coin, this game is statistically a draw. But let's say I am cheating. The coin is fair, except on some of the flips, I use a radio controlled laser thingie to control how the coin will land. As a result, in our 100 flip game, we get 55 tails and I win $5 from you. How would you go about statistically detecting this cheating? It comes down to old fashioned hypothesis testing (H0 = the coin is fair and I'm not influencing it, compute the standard deviation yada yada). Basically you can catch me if and only if I do it so much that my win rate is unlikely to occur naturally. How can you tell which specific flips I'm controlling with my device, even if I do it quite often? You really can't.
 
+> To detect such “selective cheating,” [Chess.com](http://chess.com/) utilizes sophisticated statistical methods that dig deep into the probability that any individual player could have achieved their results based on past performance. Our detection system requires robust methodologies beyond simply looking at best moves, player rating, and centipawn loss.  
+> To effectively identify the vast majority of cheating, [Chess.com](http://chess.com/) computes an aggregate Strength Score. Strength Score is a measurement of the similarity between the moves made by the player, and the moves suggested as “strongest moves” by the chess engine.
+> This Strength Score can show when a player is performing at a level above their actual chess strength, and on its own, our Strength Score is a helpful tool in successfully identifying cheating at nearly every level of play. Any player can have strong games of chess, but the Strength Score can tell us if continued strong play is legitimate or beyond the realm of statistical probability when compared to their overall skill level.
+> Rating plays no part in Chess.com’s Strength Score, as players can significantly over-perform or underperform their rating. However, in our experience, human players generally cannot legitimately stray too far from their established Strength Score for long.
+
 ### Cheater-Detection Agent
 
 Creating a chess-playing agent (AI) that doesn't just play to win, but also actively tries to identify if the opponent is a human or using computer assistance. The agent would do this by guiding the game into positions that make it easier to tell whether moves are "human-like" or "computer-like."
@@ -188,3 +196,15 @@ Identify critical positions: analyse past chess games, identifying types of posi
 - [Cheating in Chess wikipedia](https://en.wikipedia.org/wiki/Cheating_in_chess)
 - [Open Spiel](https://github.com/google-deepmind/open_spiel)
 - [AlphaZero](https://www.chessprogramming.org/AlphaZero)
+- [Video Swin Transformer](https://arxiv.org/abs/2106.13230)
+- [MViTv2: Improved Multiscale Vision Transformers for Classification and Detection](https://arxiv.org/abs/2112.01526)
+- [Multiscale Vision Transformers](https://arxiv.org/abs/2104.11227)
+- [[An Image is Worth 16x16 Words - Transformers for Image Recognition at Scale.pdf]]
+- [[An Image is Worth 16x16 Words, What is a Video Worth?.pdf]]
+- [Chess: how to spot a potential cheat](https://eng.ox.ac.uk/case-studies/chess-how-to-spot-a-potential-cheat/)
+- [[Towards Transparent Cheat Detection in Online Chess - An Application of Human and Computer Decision-Making Preferences.pdf]]
+- [[Cheat Detection on Online Chess Games using Convolutional and Dense Neural Network.pdf]]
+- [Cheating in Online Chess (Part I): Suspicions of Engine Assistance](https://www.chessable.com/blog/cheating-in-online-chess-pt-1/)
+- [Chess cheating: how to detect it (other than catching someone with a shoe phone)](https://statmodeling.stat.columbia.edu/2022/10/06/chess-cheating-how-to-detect-it-other-than-catching-someone-with-a-shoe-phone/)
+- [The Intricacies of Detecting Chess Cheaters: A Deep Dive into Expertise, Confidence, and Cheating](https://www.chessable.com/blog/chess-cheaters-study/)
+- [ViViT: A Video Vision Transformer](https://arxiv.org/abs/2103.15691)
