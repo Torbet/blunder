@@ -17,7 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
 epochs = 20
-limit = 10
+limit = 10000
 data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
 
