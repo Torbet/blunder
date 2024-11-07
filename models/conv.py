@@ -17,7 +17,7 @@ class Conv1(nn.Module):
         x = self.conv2(x)
         x = x.view(x.size(0), -1)
         x = self.dense1(x)
-        return F.softmax(x, dim=1)
+        return x
 
 
 class Conv3(nn.Module):
@@ -33,7 +33,7 @@ class Conv3(nn.Module):
         x = self.conv2(x)
         x = x.view(x.size(0), -1)
         x = self.dense3(x)
-        return F.softmax(x, dim=1)
+        return x
 
 
 class Conv6(nn.Module):
@@ -49,4 +49,4 @@ class Conv6(nn.Module):
         x = self.conv2(x)
         x = x.view(x.size(0), -1)
         x = self.dense6(x)
-        return F.softmax(x, dim=1)
+        return x

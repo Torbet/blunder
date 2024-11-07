@@ -19,4 +19,4 @@ class Conv3D(nn.Module):
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = self.l2(x)
-        return F.softmax(x, dim=1)
+        return x

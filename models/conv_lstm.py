@@ -25,7 +25,6 @@ class ConvLSTM(nn.Module):
         x, _ = self.lstm(x)
         x = x[:, -1]
         x = self.l1(x)
-        x = F.sigmoid(x)
         return x
 
 
@@ -56,5 +55,4 @@ class ConvLSTMExtra(nn.Module):
         x, _ = self.lstm(x)
         x = x[:, -1]
         x = self.l1(x)
-        x = F.sigmoid(x)
         return x
