@@ -30,6 +30,13 @@ class Dataset(data.Dataset):
         self.times = np.nan_to_num(np.load(f"{dir}/times.npy").astype(np.float32))
         self.labels = np.load(f"{dir}/labels.npy").astype(np.float32)
 
+        # shuffle
+        idx = np.random.permutation(len(self))
+        self.moves = self.moves[idx]
+        self.evals = self.evals[idx]
+        self.times = self.times[idx]
+        self.labels = self.labels[idx]
+
     def __len__(self):
         return self.moves.shape[0]
 
@@ -108,6 +115,7 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
             )
             predicted = model(moves, evals, times)
             _, predicted = torch.max(predicted, 1)
+            _, labels = torch.max(labels, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     return correct / total
