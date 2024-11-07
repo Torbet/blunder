@@ -13,7 +13,7 @@ class Dense1(nn.Module):
         x = x.view(x.size(0), -1)
         x = F.relu(self.l1(x))
         x = self.l2(x)
-        return F.softmax(x, dim=1)
+        return x
 
 
 class Dense3(nn.Module):
@@ -30,7 +30,7 @@ class Dense3(nn.Module):
         x = F.relu(self.l2(x))
         x = F.relu(self.l3(x))
         x = self.l4(x)
-        return F.softmax(x, dim=1)
+        return x
 
 
 class Dense6(nn.Module):
@@ -53,4 +53,4 @@ class Dense6(nn.Module):
         x = F.relu(self.l5(x))
         x = F.relu(self.l6(x))
         x = self.l7(x)
-        return F.softmax(x, dim=1)
+        return x

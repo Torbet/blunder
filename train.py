@@ -17,9 +17,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
 epochs = 20
-limit = 10000
+limit = 100
 data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
+np.random.seed(42)
 
 
 # dataset
@@ -113,11 +114,9 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
                 times.to(device),
                 labels.to(device),
             )
-            predicted = model(moves, evals, times)
-            _, predicted = torch.max(predicted, 1)
-            _, labels = torch.max(labels, 1)
+            predicted = model(moves, evals, times).argmax(dim=1)
             total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            correct += (predicted == labels.argmax(dim=1)).sum().item()
     return correct / total
 
 
