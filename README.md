@@ -106,8 +106,9 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 
 ### Test Results
 
+#### BCE Loss (20 epochs)
+
 ![[Figure_1.png]]
-20 epochs at different datasizes
 
 |                      | 1000 | 5000  | 10000 |
 | -------------------- | ---- | ----- | ----- |
@@ -126,6 +127,23 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 - ConvLSTM 30 epochs 78.5%
 - ConvLSTM 40 epochs 78.67%
 - ConvLSTMExtra 30 epochs 88.58%
+
+#### Cross Entropy Loss (20 epochs)
+
+![[10000.png]]
+
+|                   | 10000 |
+| ----------------- | ----- |
+| **Dense1**        | 77.58 |
+| **Dense3**        | 78.95 |
+| **Dense6**        | 77.48 |
+| **Conv1**         | 76.85 |
+| **Conv3**         | 77.42 |
+| **Conv6**         | 77.42 |
+| **ConvLSTM**      | 78.03 |
+| **Conv3D**        |       |
+| **ConvLSTMExtra** | 89.18 |
+| **Swin3D**        | 78.03 |
 
 ### Stanford Results
 
@@ -208,3 +226,4 @@ Identify critical positions: analyse past chess games, identifying types of posi
 - [Chess cheating: how to detect it (other than catching someone with a shoe phone)](https://statmodeling.stat.columbia.edu/2022/10/06/chess-cheating-how-to-detect-it-other-than-catching-someone-with-a-shoe-phone/)
 - [The Intricacies of Detecting Chess Cheaters: A Deep Dive into Expertise, Confidence, and Cheating](https://www.chessable.com/blog/chess-cheaters-study/)
 - [ViViT: A Video Vision Transformer](https://arxiv.org/abs/2103.15691)
+- [This Grandmaster Ran The World's Largest Chess Cheating Experiment](https://www.youtube.com/watch?v=QJM2MaWrHWo)
