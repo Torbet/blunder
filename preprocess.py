@@ -4,33 +4,29 @@ import chess.pgn
 import os
 import shutil
 from helpers.evaluate import evaluate_stockfish, evaluate_lazy
-from helpers.encode import onehot
 
 # parameters
-limit = 10000
+limit = 100
 years = [2023, 2022, 2021]
 modes = ["HvH", "HvC", "CvC"]
 num_moves = 40
 elo_range = (1800, 2200)
+label_mappings = {(0, 0): 0, (1, 0): 1, (0, 1): 2, (1, 1): 3}
 
 
 def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
     moves = np.zeros((4 * limit, num_moves, 6, 8, 8))
     evals = np.zeros((4 * limit, num_moves))
     times = np.zeros((4 * limit, num_moves))
-    labels = np.zeros((4 * limit, 4))
+    labels = np.zeros((4 * limit))
 
     count = 0
-    counts = {0: 0, 1: 0, 2: 0, 3: 0}
+    counts = {label: 0 for label in range(4)}
 
     for path in paths:
         print(path)
         with open(path) as file:
-            while True:
-                game = chess.pgn.read_game(file)
-                if game is None:
-                    break
-
+            while (game := chess.pgn.read_game(file)) is not None:
                 # metadata
                 headers = game.headers
                 white_comp = int(headers.get("WhiteIsComp", "No") == "Yes")
@@ -39,27 +35,24 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
                 black_elo = int(headers.get("BlackElo", 0))
                 ply_count = int(headers.get("PlyCount", 0))
 
-                # 0: HvH, 1: CvH, 2: HvC, 3: CvC
-                label, mapping = onehot(white_comp, black_comp)
+                label = label_mappings[(white_comp, black_comp)]
 
+                # early stopping
                 if "HvH" in path:
-                    if mapping != 0:
-                        continue
-                    if counts[mapping] >= limit:
+                    if counts[0] >= limit:
                         break
-                if "HvC" in path:
-                    if mapping not in [1, 2]:
+                    if label != 0:
                         continue
+                if "HvC" in path:
                     if counts[1] >= limit and counts[2] >= limit:
                         break
-                if "CvC" in path:
-                    if mapping != 3:
+                    if label not in [1, 2] or counts[label] >= limit:
                         continue
+                if "CvC" in path:
                     if counts[3] >= limit:
                         break
-
-                if counts[mapping] >= limit:
-                    continue
+                    if label != 3:
+                        continue
 
                 # filter
                 if white_comp == 0:
@@ -77,9 +70,8 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
 
                 # iterate
                 count += 1
-                counts[mapping] += 1
+                counts[label] += 1
                 print(count, counts)
-                game = chess.pgn.read_game(file)
 
     return moves, evals, times, labels
 
@@ -96,11 +88,10 @@ def parse_game(game: chess.pgn.Game) -> np.ndarray:
             break
         board.push(node.move)
         # skip first 10 moves
-        if i < 10:
-            continue
-        moves[i - 10] = parse_board(board)
-        evals[i - 10] = evaluate_stockfish(board)
-        times[i - 10] = node.emt()
+        if i >= 10:
+            moves[i - 10] = parse_board(board)
+            evals[i - 10] = evaluate_stockfish(board)
+            times[i - 10] = node.emt()
 
     return moves, evals, times
 
@@ -109,28 +100,24 @@ def parse_board(board: chess.Board) -> np.ndarray:
     # 6 channels for each piece type
     output = np.zeros((6, 8, 8))
     for i in range(64):
-        piece = board.piece_at(i)
-        if piece is not None:
-            colour = int(piece.color)
+        if (piece := board.piece_at(i)) is not None:
             piece_type = piece.piece_type
-            # output[piece_type - 1 + 6 * colour][i // 8][i % 8] = 1
-            output[piece_type - 1][i // 8][i % 8] = 1 if colour == 0 else -1
+            piece_color = piece.color
+            output[piece_type - 1][i // 8][i % 8] = 1 if piece_color else -1
     return output
 
 
 if __name__ == "__main__":
     paths = [f"data/raw/{year}_{mode}.pgn" for year in years for mode in modes]
-    output = f"data/processed/{limit}"
-    if os.path.exists(output):
-        shutil.rmtree(output)
-    os.makedirs(output)
+    output_dir = f"data/processed/{limit}"
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(output_dir)
 
     moves, evals, times, labels = parse_files(paths)
-    print("evals", evals, "\n\n")
-    print("times", times, "\n\n")
-    np.save(f"{output}/moves.npy", moves)
-    np.save(f"{output}/evals.npy", evals)
-    np.save(f"{output}/times.npy", times)
-    np.save(f"{output}/labels.npy", labels)
+    for name, data in zip(
+        ["moves", "evals", "times", "labels"], [moves, evals, times, labels]
+    ):
+        np.save(f"{output_dir}/{name}.npy", data)
 
-    print(f"Saved to {output}")
+    print(f"Saved to {output_dir}")
