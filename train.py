@@ -28,9 +28,9 @@ np.random.seed(42)
 # dataset
 class Dataset(data.Dataset):
     def __init__(self, dir: str):
-        self.moves = np.load(f"{dir}/moves.npy").astype(np.float32)
-        self.evals = np.load(f"{dir}/evals.npy").astype(np.float32)
-        self.times = np.nan_to_num(np.load(f"{dir}/times.npy").astype(np.float32))
+        self.moves = np.load(f"{dir}/moves.npy")
+        self.evals = np.load(f"{dir}/evals.npy")
+        self.times = np.nan_to_num(np.load(f"{dir}/times.npy"))
         self.labels = np.load(f"{dir}/labels.npy")
 
         # shuffle
@@ -45,10 +45,10 @@ class Dataset(data.Dataset):
 
     def __getitem__(self, idx: int):
         return (
-            torch.from_numpy(self.moves[idx]).to(device),
-            torch.from_numpy(self.evals[idx]).to(device),
-            torch.from_numpy(self.times[idx]).to(device),
-            torch.tensor(self.labels[idx], dtype=torch.long).to(device),
+            torch.from_numpy(self.moves[idx]).float().to(device),
+            torch.from_numpy(self.evals[idx]).float().to(device),
+            torch.from_numpy(self.times[idx]).float().to(device),
+            torch.tensor(self.labels[idx]).long().to(device),
         )
 
 
