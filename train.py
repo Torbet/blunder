@@ -11,6 +11,7 @@ from models.dense import Dense1, Dense3, Dense6  # stanford paper
 from models.conv import Conv1, Conv3, Conv6  # stanford paper
 from models.conv_lstm import ConvLSTM, ConvLSTMExtra
 from models.conv3d import Conv3D
+from models.transformer import Swin3D
 
 # parameters
 model = Conv3
@@ -18,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
 epochs = 20
-limit = 100
+limit = 10000
 data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
 np.random.seed(42)
