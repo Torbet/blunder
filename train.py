@@ -19,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
 epochs = 20
-limit = 10000
+limit = 100
 data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
 np.random.seed(42)
@@ -31,7 +31,7 @@ class Dataset(data.Dataset):
         self.moves = np.load(f"{dir}/moves.npy").astype(np.float32)
         self.evals = np.load(f"{dir}/evals.npy").astype(np.float32)
         self.times = np.nan_to_num(np.load(f"{dir}/times.npy").astype(np.float32))
-        self.labels = np.load(f"{dir}/labels.npy").astype(np.long)
+        self.labels = np.load(f"{dir}/labels.npy")
 
         # shuffle
         idx = np.random.permutation(len(self))
@@ -44,7 +44,12 @@ class Dataset(data.Dataset):
         return self.moves.shape[0]
 
     def __getitem__(self, idx: int):
-        return self.moves[idx], self.evals[idx], self.times[idx], self.labels[idx]
+        return (
+            torch.from_numpy(self.moves[idx]).to(device),
+            torch.from_numpy(self.evals[idx]).to(device),
+            torch.from_numpy(self.times[idx]).to(device),
+            torch.tensor(self.labels[idx], dtype=torch.long).to(device),
+        )
 
 
 def load_data(path: str):
