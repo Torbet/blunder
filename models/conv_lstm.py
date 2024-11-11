@@ -39,20 +39,15 @@ class ConvLSTMExtra(nn.Module):
         self.l1 = nn.Linear(lstm_out, 4)
 
     def forward(
-        self, board: torch.Tensor, evals: torch.Tensor, times: torch.Tensor
+        self, moves: torch.Tensor, evals: torch.Tensor, times: torch.Tensor
     ) -> torch.Tensor:
-        bs, ts, C, H, W = board.size()
-        out = []
-        for i in range(ts):
-            xt = board[:, i]
-            xt = F.relu(self.conv1(xt))
-            xt = F.relu(self.conv2(xt))
-            xt = F.relu(self.conv3(xt))
-            xt = xt.flatten(1)
-            xt = torch.cat((xt, evals[:, i : i + 1], times[:, i : i + 1]), dim=1)
-            out.append(xt)
-
-        x = torch.stack(out, dim=1)
+        bs, ts, C, H, W = moves.size()
+        moves = moves.view(bs * ts, C, H, W)
+        x = F.relu(self.conv1(moves))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = x.view(bs, ts, -1)
+        x = torch.cat((x, evals.unsqueeze(-1), times.unsqueeze(-1)), dim=2)
         x, _ = self.lstm(x)
         x = x[:, -1]
         x = self.l1(x)
@@ -79,17 +74,15 @@ class ConvLSTMExtra2(nn.Module):
         self, moves: torch.Tensor, evals: torch.Tensor, times: torch.Tensor
     ) -> torch.Tensor:
         bs, ts, C, H, W = moves.size()
-        out = []
-        for i in range(ts):
-            xt = moves[:, i]
-            xt = self.pool(F.relu(self.bn1(self.conv1(xt))))
-            xt = self.pool(F.relu(self.bn2(self.conv2(xt))))
-            xt = self.pool(F.relu(self.bn3(self.conv3(xt))))
-            xt = xt.flatten(1)
-            xt = torch.cat((xt, evals[:, i : i + 1], times[:, i : i + 1]), dim=1)
-            out.append(xt)
-
-        x = torch.stack(out, dim=1)
+        moves = moves.view(bs * ts, C, H, W)
+        x = F.relu(self.bn1(self.conv1(moves)))
+        x = self.pool(x)
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = self.pool(x)
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = self.pool(x)
+        x = x.view(bs, ts, -1)
+        x = torch.cat((x, evals.unsqueeze(-1), times.unsqueeze(-1)), dim=2)
         x, _ = self.lstm(x)
         x = x[:, -1]
         x = F.relu(self.l1(x))
