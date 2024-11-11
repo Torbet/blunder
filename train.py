@@ -9,12 +9,12 @@ import matplotlib.pyplot as plt
 # models
 from models.dense import Dense1, Dense3, Dense6  # stanford paper
 from models.conv import Conv1, Conv3, Conv6  # stanford paper
-from models.conv_lstm import ConvLSTM, ConvLSTMExtra
+from models.conv_lstm import ConvLSTM, ConvLSTMExtra, ConvLSTMExtra2
 from models.conv3d import Conv3D
 from models.transformer import Swin3D
 
 # parameters
-model = ConvLSTMExtra
+model = ConvLSTMExtra2(bidirectional=False)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
@@ -111,7 +111,7 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
 
 
 if __name__ == "__main__":
-    model = model().to(device)
+    model = model.to(device)
     model_name = model.__class__.__name__
     print(model_name, "\n")
     train_loader, val_loader, test_loader = load_data(data_path)
