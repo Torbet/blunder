@@ -111,6 +111,9 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
 
 
 if __name__ == "__main__":
+    # multi-gpu :)
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
     model = model.to(device)
     model_name = model.__class__.__name__
     print(model_name, "\n")
