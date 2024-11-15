@@ -14,7 +14,7 @@ from models.conv3d import Conv3D
 from models.transformer import Swin3D
 
 # parameters
-model = ConvLSTMExtra2(bidirectional=False)
+model = Dense1()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-4
@@ -114,15 +114,22 @@ if __name__ == "__main__":
     # multi-gpu :)
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
-    model = model.to(device)
     model_name = model.__class__.__name__
+    model = torch.compile(model.to(device))
     print(model_name, "\n")
     train_loader, val_loader, test_loader = load_data(data_path)
     losses, accuracies = train(model, train_loader, val_loader)
     test_accuracy = evaluate(model, test_loader)
     print(f"\nTest accuracy: {(test_accuracy*100):.2f}%")
+
+    # save results
     np.savez(f"results/{model_name}-{limit}.npz", losses=losses, accuracies=accuracies)
+
+    # plot results
     plt.plot(losses, label="Loss")
     plt.plot(accuracies, label="Accuracy")
     plt.legend()
     plt.show()
+
+    # save model
+    torch.save(model.state_dict(), f"weights/{model_name}-{limit}.pt")
