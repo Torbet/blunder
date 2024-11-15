@@ -1,5 +1,12 @@
 ## Blunder
 
+### TODOs
+
+- [ ] Maya (human) / StockFish (computer) synthetic data
+- [ ] Web ui to play chess and suggest engine moves (show graphs of probabilities)
+
+### Why?
+
 Online chess platforms have experienced significant growth, paralleled by an [increase in cheating incidents that undermine the integrity of the game](https://www.chess.com/article/view/online-chess-cheating).
 
 Existing detection systems often struggle to keep pace with the evolving methods of cheating, which range from using chess engines, consulting databases, or receiving external help during play.
@@ -66,7 +73,7 @@ The research is expected to contribute to the development of more sophisticated 
 - 2 dim output with sigmoid or 4 dim (1 for each class) with cross entropy?
 - Loss goes to 0, overfitting?
 - ConvLSTM loss ends higher than other model - longer training epochs?
--
+- VIT can be trained on large amounts of data and fine-tuned - train on lots of human games and fine tune to recognise irregularities (cheating)
 
 ### Datasets
 
@@ -74,7 +81,7 @@ The research is expected to contribute to the development of more sophisticated 
 
 ### Preprocessing
 
-### Board Representation
+#### Board Representation
 
 As per the original paper, the data will be formed into a `nx8x8x6` tensor, where `n` is the number of moves in the game and the 6 channels represent each piece type, with 1 for white and -1 for black.
 Can also look into how Alpha-Zero represents the board.
@@ -108,7 +115,7 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 
 #### BCE Loss (20 epochs)
 
-![[Figure_1.png]]
+![bce_10000](figures/bce_10000.png)
 
 |                      | 1000 | 5000  | 10000 |
 | -------------------- | ---- | ----- | ----- |
@@ -130,20 +137,24 @@ With transformer we can pad and mask the input, so we can utilise all games and 
 
 #### Cross Entropy Loss (20 epochs)
 
-![[10000.png]]
+![ce_10000](figures/ce_10000.png)
 
-|                   | 10000 |
-| ----------------- | ----- |
-| **Dense1**        | 77.58 |
-| **Dense3**        | 78.95 |
-| **Dense6**        | 77.48 |
-| **Conv1**         | 76.85 |
-| **Conv3**         | 77.42 |
-| **Conv6**         | 77.42 |
-| **ConvLSTM**      | 78.03 |
-| **Conv3D**        |       |
-| **ConvLSTMExtra** | 89.18 |
-| **Swin3D**        | 78.03 |
+|                                    | **1000** | 10000 |
+| ---------------------------------- | -------- | ----- |
+| **Dense1**                         |          | 77.58 |
+| **Dense3**                         |          | 78.95 |
+| **Dense6**                         |          | 77.48 |
+| **Conv1**                          |          | 76.85 |
+| **Conv3**                          |          | 77.42 |
+| **Conv6**                          |          | 77.42 |
+| **ConvLSTM**                       | 66.75    | 78.03 |
+| **Conv3D**                         |          |       |
+| **ConvLSTMExtra**                  |          | 89.18 |
+| **ConvLSTMExtra (bidirectional)**  |          | 91.15 |
+| **ConvLSTMExtra2**                 |          | 88.55 |
+| **ConvLSTMExtra2 (bidirectional)** |          | 87.8  |
+| **Swin3D**                         |          | 78.03 |
+| **ViT3D**                          | 53.25    |       |
 
 ### Stanford Results
 
@@ -227,3 +238,6 @@ Identify critical positions: analyse past chess games, identifying types of posi
 - [The Intricacies of Detecting Chess Cheaters: A Deep Dive into Expertise, Confidence, and Cheating](https://www.chessable.com/blog/chess-cheaters-study/)
 - [ViViT: A Video Vision Transformer](https://arxiv.org/abs/2103.15691)
 - [This Grandmaster Ran The World's Largest Chess Cheating Experiment](https://www.youtube.com/watch?v=QJM2MaWrHWo)
+- [Maya Chess Engine](https://www.maiachess.com)
+- [Lichess Database](https://database.lichess.org)
+- [Leela Chess Zero](https://lczero.org)
