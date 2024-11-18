@@ -4,14 +4,18 @@ from stockfish import Stockfish
 stockfish = Stockfish(depth=8)
 
 
-def evaluate_stockfish(board: chess.Board):
+def evaluate_stockfish(
+    board: chess.Board, num_best_moves: int = 5
+) -> tuple[int, list[str]]:
     # Evaluate the board position using Stockfish.
     stockfish.set_fen_position(board.fen())
     evaluation = stockfish.get_evaluation()
+    # top 5 best moves
+    best_moves = [x["Move"] for x in stockfish.get_top_moves(num_best_moves)]
     if evaluation["type"] == "mate":
-        return 10000 if evaluation["value"] > 0 else -10000
+        return 10000 if evaluation["value"] > 0 else -10000, best_moves
     else:
-        return evaluation["value"]
+        return evaluation["value"], best_moves
 
 
 def evaluate_lazy(board: chess.Board) -> int:
