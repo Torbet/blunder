@@ -34,12 +34,16 @@ class ConvLSTMExtra(nn.Module):
         self.conv1 = nn.Conv2d(6, 64, kernel_size=3)
         self.conv2 = nn.Conv2d(64, 128, kernel_size=3)
         self.conv3 = nn.Conv2d(128, 256, kernel_size=3)
-        self.lstm = nn.LSTM(1026, 512, batch_first=True, bidirectional=bidirectional)
+        self.lstm = nn.LSTM(1027, 512, batch_first=True, bidirectional=bidirectional)
         lstm_out = 512 * (2 if bidirectional else 1)
         self.l1 = nn.Linear(lstm_out, 4)
 
     def forward(
-        self, moves: torch.Tensor, evals: torch.Tensor, times: torch.Tensor
+        self,
+        moves: torch.Tensor,
+        evals: torch.Tensor,
+        times: torch.Tensor,
+        best_moves: torch.Tensor,
     ) -> torch.Tensor:
         bs, ts, C, H, W = moves.size()
         moves = moves.view(bs * ts, C, H, W)
@@ -47,7 +51,10 @@ class ConvLSTMExtra(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = x.view(bs, ts, -1)
-        x = torch.cat((x, evals.unsqueeze(-1), times.unsqueeze(-1)), dim=2)
+        x = torch.cat(
+            (x, evals.unsqueeze(-1), times.unsqueeze(-1), best_moves.unsqueeze(-1)),
+            dim=2,
+        )
         x, _ = self.lstm(x)
         x = x[:, -1]
         x = self.l1(x)
@@ -57,35 +64,39 @@ class ConvLSTMExtra(nn.Module):
 class ConvLSTMExtra2(nn.Module):
     def __init__(self, bidirectional: bool = False):
         super(ConvLSTMExtra2, self).__init__()
-        self.conv1 = nn.Conv2d(6, 32, kernel_size=3, padding=1)
-        self.bn1 = nn.BatchNorm2d(32)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.bn3 = nn.BatchNorm2d(128)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.lstm = nn.LSTM(130, 256, batch_first=True, bidirectional=bidirectional)
-        lstm_out = 256 * (2 if bidirectional else 1)
-        self.l1 = nn.Linear(lstm_out, 128)
-        self.dropout = nn.Dropout(0.5)
-        self.l2 = nn.Linear(128, 4)
+        self.conv1 = nn.Conv2d(6, 64, kernel_size=5)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=3)
+        self.bn2 = nn.BatchNorm2d(128)
+        self.conv3 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
+        self.bn3 = nn.BatchNorm2d(256)
+        self.dropout = nn.Dropout(0.3)
+
+        self.lstm = nn.LSTM(1027, 512, batch_first=True, bidirectional=bidirectional)
+        lstm_out = 512 * (2 if bidirectional else 1)
+        self.l1 = nn.Linear(lstm_out, 4)
 
     def forward(
-        self, moves: torch.Tensor, evals: torch.Tensor, times: torch.Tensor
+        self,
+        moves: torch.Tensor,
+        evals: torch.Tensor,
+        times: torch.Tensor,
+        best_moves: torch.Tensor,
     ) -> torch.Tensor:
         bs, ts, C, H, W = moves.size()
         moves = moves.view(bs * ts, C, H, W)
         x = F.relu(self.bn1(self.conv1(moves)))
-        x = self.pool(x)
+        x = self.dropout(x)
         x = F.relu(self.bn2(self.conv2(x)))
-        x = self.pool(x)
+        x = self.dropout(x)
         x = F.relu(self.bn3(self.conv3(x)))
-        x = self.pool(x)
+        x = self.dropout(x)
         x = x.view(bs, ts, -1)
-        x = torch.cat((x, evals.unsqueeze(-1), times.unsqueeze(-1)), dim=2)
+        x = torch.cat(
+            (x, evals.unsqueeze(-1), times.unsqueeze(-1), best_moves.unsqueeze(-1)),
+            dim=2,
+        )
         x, _ = self.lstm(x)
         x = x[:, -1]
-        x = F.relu(self.l1(x))
-        x = self.dropout(x)
-        x = self.l2(x)
+        x = self.l1(x)
         return x

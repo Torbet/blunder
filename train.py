@@ -5,6 +5,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torch.utils.data as data
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 # models
 from models.dense import Dense1, Dense3, Dense6  # stanford paper
@@ -14,12 +15,12 @@ from models.conv3d import Conv3D
 from models.transformer import Swin3D
 
 # parameters
-model = Dense1()
+model = ConvLSTMExtra2(bidirectional=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
-learning_rate = 1e-4
+learning_rate = 1e-3
 epochs = 20
-limit = 100
+limit = 10000
 data_path = f"data/processed/{limit}"
 torch.random.manual_seed(42)
 np.random.seed(42)
@@ -31,6 +32,7 @@ class Dataset(data.Dataset):
         self.moves = np.load(f"{dir}/moves.npy")
         self.evals = np.load(f"{dir}/evals.npy")
         self.times = np.nan_to_num(np.load(f"{dir}/times.npy"))
+        self.best_moves = np.load(f"{dir}/best_moves.npy")
         self.labels = np.load(f"{dir}/labels.npy")
 
         # shuffle
@@ -38,6 +40,7 @@ class Dataset(data.Dataset):
         self.moves = self.moves[idx]
         self.evals = self.evals[idx]
         self.times = self.times[idx]
+        self.best_moves = self.best_moves[idx]
         self.labels = self.labels[idx]
 
     def __len__(self):
@@ -45,10 +48,11 @@ class Dataset(data.Dataset):
 
     def __getitem__(self, idx: int):
         return (
-            torch.from_numpy(self.moves[idx]).float().to(device),
-            torch.from_numpy(self.evals[idx]).float().to(device),
-            torch.from_numpy(self.times[idx]).float().to(device),
-            torch.tensor(self.labels[idx]).long().to(device),
+            torch.tensor(self.moves[idx], dtype=torch.float32),
+            torch.tensor(self.evals[idx], dtype=torch.float32),
+            torch.tensor(self.times[idx], dtype=torch.float32),
+            torch.tensor(self.best_moves[idx], dtype=torch.float32),
+            torch.tensor(self.labels[idx], dtype=torch.long),
         )
 
 
@@ -63,7 +67,9 @@ def load_data(path: str):
 
     # Create dataloaders
     return (
-        data.DataLoader(ds, batch_size=batch_size, shuffle=(ds is train_ds))
+        data.DataLoader(
+            ds, batch_size=batch_size, shuffle=(ds is train_ds), num_workers=4
+        )
         for ds in [train_ds, val_ds, test_ds]
     )
 
@@ -71,6 +77,7 @@ def load_data(path: str):
 def train(model: nn.Module, train_loader: data.DataLoader, val_loader: data.DataLoader):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    lr_decay = optim.lr_scheduler.ExponentialLR(optimizer, 0.95)
 
     losses, accuracies = [], []
 
@@ -78,23 +85,33 @@ def train(model: nn.Module, train_loader: data.DataLoader, val_loader: data.Data
         # train
         model.train()
         epoch_loss = 0
-        for moves, evals, times, labels in train_loader:
-            optimizer.zero_grad()
-            predicted = model(moves, evals, times)
-            loss = criterion(predicted, labels)
-            loss.backward()
-            optimizer.step()
-            epoch_loss += loss.item()
+        with tqdm(train_loader) as t:
+            for moves, evals, times, best_moves, labels in train_loader:
+                moves, evals, times, best_moves, labels = (
+                    moves.to(device),
+                    evals.to(device),
+                    times.to(device),
+                    best_moves.to(device),
+                    labels.to(device),
+                )
+                optimizer.zero_grad()
+                predicted = model(moves, evals, times, best_moves)
+                loss = criterion(predicted, labels)
+                loss.backward()
+                optimizer.step()
+                epoch_loss += loss.item()
+                train_acc = (predicted.argmax(dim=1) == labels).sum().item() / len(
+                    labels
+                )
+                t.set_description(
+                    f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.2f}, Acc: {train_acc:.2f}"
+                )
+                t.update(1)
         losses.append(epoch_loss / len(train_loader))
 
         # test
         accuracy = evaluate(model, val_loader)
         accuracies.append(accuracy)
-
-        # log
-        print(
-            f"Epoch {epoch + 1}/{epochs}, Loss: {losses[-1]:.2f}, Accuracy: {(accuracies[-1]*100):.2f}%"
-        )
 
     return losses, accuracies
 
@@ -103,19 +120,23 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
-        for moves, evals, times, labels in loader:
-            predicted = model(moves, evals, times).argmax(dim=1)
+        for moves, evals, times, best_moves, labels in loader:
+            moves, evals, times, best_moves, labels = (
+                moves.to(device),
+                evals.to(device),
+                times.to(device),
+                best_moves.to(device),
+                labels.to(device),
+            )
+            predicted = model(moves, evals, times, best_moves).argmax(dim=1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     return correct / total
 
 
 if __name__ == "__main__":
-    # multi-gpu :)
-    if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
     model_name = model.__class__.__name__
-    model = torch.compile(model.to(device))
+    model = model.to(device)
     print(model_name, "\n")
     train_loader, val_loader, test_loader = load_data(data_path)
     losses, accuracies = train(model, train_loader, val_loader)

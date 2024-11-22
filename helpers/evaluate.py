@@ -1,7 +1,9 @@
 import chess
 from stockfish import Stockfish
 
-stockfish = Stockfish(depth=8)
+stockfish = Stockfish(
+    depth=8, path="/home/gtorbet/downloads/stockfish/stockfish-ubuntu-x86-64-avx2"
+)
 
 
 def evaluate_stockfish(

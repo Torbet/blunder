@@ -6,8 +6,8 @@ import shutil
 from helpers.evaluate import evaluate_stockfish, evaluate_lazy
 
 # parameters
-limit = 100
-years = [2023, 2022, 2021]
+limit = 20000
+years = [2023, 2022, 2021, 2020, 2019]
 modes = ["HvH", "HvC", "CvC"]
 num_moves = 40
 elo_range = (1800, 2200)
