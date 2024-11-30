@@ -67,9 +67,7 @@ def parse_files(paths: list[str]) -> tuple[np.ndarray, np.ndarray]:
                     continue
 
                 # parse
-                moves[count], evals[count], times[count], best_moves[count] = (
-                    parse_game(game)
-                )
+                moves[count], evals[count], times[count], best_moves[count] = parse_game(game)
                 labels[count] = label
 
                 # iterate

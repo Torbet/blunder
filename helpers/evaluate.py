@@ -1,14 +1,10 @@
 import chess
 from stockfish import Stockfish
 
-stockfish = Stockfish(
-    depth=8, path="/home/gtorbet/downloads/stockfish/stockfish-ubuntu-x86-64-avx2"
-)
+stockfish = Stockfish(depth=8, path="/home/gtorbet/downloads/stockfish/stockfish-ubuntu-x86-64-avx2")
 
 
-def evaluate_stockfish(
-    board: chess.Board, num_best_moves: int = 5
-) -> tuple[int, list[str]]:
+def evaluate_stockfish(board: chess.Board, num_best_moves: int = 5) -> tuple[int, list[str]]:
     # Evaluate the board position using Stockfish.
     stockfish.set_fen_position(board.fen())
     evaluation = stockfish.get_evaluation()
@@ -38,10 +34,6 @@ def evaluate_lazy(board: chess.Board) -> int:
         for color in (chess.WHITE, chess.BLACK)
     }
 
-    value = sum(
-        PV[piece]
-        * (piece_counts[chess.WHITE][piece] - piece_counts[chess.BLACK][piece])
-        for piece in PV
-    )
+    value = sum(PV[piece] * (piece_counts[chess.WHITE][piece] - piece_counts[chess.BLACK][piece]) for piece in PV)
 
     return value if board.turn == chess.WHITE else -value

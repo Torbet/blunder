@@ -15,7 +15,7 @@ from models.conv3d import Conv3D
 from models.transformer import Swin3D
 
 # parameters
-model = ConvLSTMExtra2(bidirectional=True)
+model = ConvLSTMExtra(bidirectional=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 64
 learning_rate = 1e-3
@@ -67,9 +67,7 @@ def load_data(path: str):
 
     # Create dataloaders
     return (
-        data.DataLoader(
-            ds, batch_size=batch_size, shuffle=(ds is train_ds), num_workers=4
-        )
+        data.DataLoader(ds, batch_size=batch_size, shuffle=(ds is train_ds), num_workers=4)
         for ds in [train_ds, val_ds, test_ds]
     )
 
@@ -94,18 +92,15 @@ def train(model: nn.Module, train_loader: data.DataLoader, val_loader: data.Data
                     best_moves.to(device),
                     labels.to(device),
                 )
+
                 optimizer.zero_grad()
                 predicted = model(moves, evals, times, best_moves)
                 loss = criterion(predicted, labels)
                 loss.backward()
                 optimizer.step()
                 epoch_loss += loss.item()
-                train_acc = (predicted.argmax(dim=1) == labels).sum().item() / len(
-                    labels
-                )
-                t.set_description(
-                    f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.2f}, Acc: {train_acc:.2f}"
-                )
+                train_acc = (predicted.argmax(dim=1) == labels).sum().item() / len(labels)
+                t.set_description(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.2f}, Acc: {train_acc:.2f}")
                 t.update(1)
         losses.append(epoch_loss / len(train_loader))
 
@@ -137,7 +132,7 @@ def evaluate(model: nn.Module, loader: data.DataLoader):
 if __name__ == "__main__":
     model_name = model.__class__.__name__
     model = model.to(device)
-    print(model_name, "\n")
+    print(model_name, "lr:", learning_rate, "\n")
     train_loader, val_loader, test_loader = load_data(data_path)
     losses, accuracies = train(model, train_loader, val_loader)
     test_accuracy = evaluate(model, test_loader)
