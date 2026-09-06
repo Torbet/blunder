@@ -1,0 +1,22 @@
+[project]
+name = "blunder"
+version = "0.1.0"
+description = "Cheat Detection System for Online Chess"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.411",
+    "ruff>=0.16.6",
+]
+
+[tool.uv.workspace]
+members = [ "apps/*", "libs/*" ]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint.isort]
+known-first-party = ["blunder"]
