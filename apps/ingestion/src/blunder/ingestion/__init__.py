@@ -1,4 +1,9 @@
+from pathlib import Path
+
 import typer
+
+from blunder.ingestion.pgn.converter import Converter
+from blunder.shared.core.records import GameRecord
 
 
 def ingest() -> None:
@@ -9,7 +14,8 @@ def ingest() -> None:
 
 
 def convert() -> None:
-    def _command() -> None:
-        print("Running conversion...")
+    def _command(input: Path, output: Path) -> None:
+        records = Converter().convert(input)
+        GameRecord.save(output, records)
 
     typer.run(_command)

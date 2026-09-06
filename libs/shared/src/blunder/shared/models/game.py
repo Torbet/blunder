@@ -24,8 +24,8 @@ class Game(Identifiable, GameBase): ...
 class MoveBase(BaseModel):
     index: int
     uci: str
-    evaluation: float
-    time: float
+    evaluation: int | None
+    time: float | None
 
 
 class Move(Identifiable, MoveBase):
