@@ -9,20 +9,6 @@ from blunder.api.core.database import Base
 from blunder.shared.models.game import Elos, Result
 
 
-class Game(Base):
-    __tablename__ = "games"
-
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-
-    elos: Mapped[Elos] = mapped_column(JSONB)
-    result: Mapped[Result]
-
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
-
-    moves: Mapped[list[Move]] = relationship(back_populates="game", lazy="selectin")
-
-
 class Move(Base):
     __tablename__ = "moves"
 
@@ -37,3 +23,19 @@ class Move(Base):
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     game: Mapped[Game] = relationship(back_populates="moves")
+
+
+class Game(Base):
+    __tablename__ = "games"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+
+    elos: Mapped[Elos] = mapped_column(JSONB)
+    result: Mapped[Result]
+
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    moves: Mapped[list[Move]] = relationship(
+        back_populates="game", lazy="selectin", cascade="all, delete-orphan", order_by=Move.index
+    )
