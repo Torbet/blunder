@@ -9,7 +9,7 @@ from blunder.api.core.config import settings
 from blunder.api.core.database import Base, load_models
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.postgres.url)
+config.set_main_option("sqlalchemy.url", settings().postgres.url)
 
 load_models()
 target_metadata = Base.metadata

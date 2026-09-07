@@ -163,11 +163,15 @@ name = "blunder-ingestion"
 version = "0.1.0"
 source = { editable = "apps/ingestion" }
 dependencies = [
+    { name = "blunder-client" },
     { name = "blunder-shared" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "blunder-shared", editable = "libs/shared" }]
+requires-dist = [
+    { name = "blunder-client", editable = "libs/client" },
+    { name = "blunder-shared", editable = "libs/shared" },
+]
 
 [[package]]
 name = "blunder-shared"

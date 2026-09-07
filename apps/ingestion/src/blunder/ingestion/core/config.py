@@ -4,24 +4,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class APISettings(BaseModel):
-    port: int
-
-
-class PostgresSettings(BaseModel):
     host: str
     port: int
-    user: str
-    password: str
-    database: str
 
     @property
     def url(self) -> str:
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        protocol = "https" if self.port == 443 else "http"
+        return f"{protocol}://{self.host}:{self.port}"
 
 
 class Settings(BaseSettings):
     api: APISettings = Field(default=...)
-    postgres: PostgresSettings = Field(default=...)
 
     model_config = SettingsConfigDict(env_file=find_dotenv(), env_nested_delimiter="__")
 

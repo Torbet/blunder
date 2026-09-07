@@ -22,7 +22,7 @@ class Base(DeclarativeBase):
 
 
 engine = create_async_engine(
-    settings.postgres.url,
+    settings().postgres.url,
     json_serializer=lambda value: json.dumps(
         value, default=lambda value: value.model_dump(mode="json")
     ),
