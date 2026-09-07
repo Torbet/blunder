@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from blunder.shared.models import Identifiable
+from blunder.shared.models import Identifiable, Timestamped
 
 type Result = Literal["white", "black", "draw"]
 
@@ -28,5 +28,5 @@ class MoveBase(BaseModel):
     time: float | None
 
 
-class Move(Identifiable, MoveBase):
+class Move(Timestamped, MoveBase):
     game_id: UUID

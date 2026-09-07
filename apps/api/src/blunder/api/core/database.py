@@ -1,4 +1,6 @@
+import json
 from collections.abc import AsyncGenerator
+from importlib import import_module
 
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -19,10 +21,20 @@ class Base(DeclarativeBase):
     )
 
 
-engine = create_async_engine(settings.postgres.url)
+engine = create_async_engine(
+    settings.postgres.url,
+    json_serializer=lambda value: json.dumps(
+        value, default=lambda value: value.model_dump(mode="json")
+    ),
+)
 factory = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_session() -> AsyncGenerator[AsyncSession]:
     async with factory() as session:
         yield session
+
+
+def load_models() -> None:
+    for module in ["game"]:
+        import_module(f"blunder.api.{module}.models")
