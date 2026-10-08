@@ -2,6 +2,7 @@
 name = "blunder-ingestion"
 version = "0.1.0"
 dependencies = [
+    "blunder-client",
     "blunder-shared",
 ]
 
@@ -18,3 +19,4 @@ packages = ["src/blunder"]
 
 [tool.uv.sources]
 blunder-shared = { workspace = true }
+blunder-client = { workspace = true }
