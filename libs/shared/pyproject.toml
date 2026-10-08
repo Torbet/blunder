@@ -2,6 +2,7 @@
 name = "blunder-shared"
 version = "0.1.0"
 dependencies = [
+    "pydantic>=2.14.0",
     "typer>=0.27.3",
 ]
 
