@@ -2,8 +2,11 @@
 name = "blunder-api"
 version = "0.1.0"
 dependencies = [
+    "alembic>=1.20.0",
+    "asyncpg>=0.32.0",
     "blunder-shared",
     "fastapi>=0.143.0",
+    "sqlalchemy[asyncio]>=2.1.4",
     "uvicorn>=0.54.0",
 ]
 
@@ -19,3 +22,7 @@ packages = ["src/blunder"]
 
 [tool.uv.sources]
 blunder-shared = { workspace = true }
+
+[tool.alembic]
+script_location = "migrations"
+prepend_sys_path = [ "." ]
