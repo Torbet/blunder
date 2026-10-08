@@ -3,6 +3,8 @@ name = "blunder-api"
 version = "0.1.0"
 dependencies = [
     "blunder-shared",
+    "fastapi>=0.143.0",
+    "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
