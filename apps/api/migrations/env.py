@@ -6,11 +6,12 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from blunder.api.core.config import settings
-from blunder.api.core.database import Base
+from blunder.api.core.database import Base, load_models
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.postgres.url)
 
+load_models()
 target_metadata = Base.metadata
 
 
