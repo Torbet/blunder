@@ -21,7 +21,10 @@ class Game(Base):
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     moves: Mapped[list[Move]] = relationship(
-        back_populates="game", cascade="all, delete-orphan", order_by="Move.index"
+        back_populates="game",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+        order_by="Move.index",
     )
 
 
