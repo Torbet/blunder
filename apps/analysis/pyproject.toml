@@ -3,6 +3,7 @@ name = "blunder-analysis"
 version = "0.1.0"
 dependencies = [
     "blunder-shared",
+    "pyyaml>=6.0.3",
 ]
 
 [project.scripts]
