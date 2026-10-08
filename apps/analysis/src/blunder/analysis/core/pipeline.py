@@ -6,7 +6,6 @@ from pydantic import BaseModel
 
 from blunder.shared.analysis.evaluation import EvaluationConfig
 from blunder.shared.core.records import GameRecord
-lazy from blunder.analysis.evaluation.step import EvaluationStep
 
 
 class PipelineConfig(BaseModel):
@@ -33,11 +32,13 @@ class Pipeline:
 
     @classmethod
     def build(cls, config: PipelineConfig) -> Pipeline:
+        from blunder.analysis.evaluation.step import EvaluationStep
+
         steps: list[PipelineStep] = []
 
         for step in config.steps:
-            match step:
-                case EvaluationConfig():
+            match step.type:
+                case "evaluation":
                     steps.append(EvaluationStep(step))
 
         return cls(steps)
