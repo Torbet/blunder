@@ -116,13 +116,13 @@ version = "0.1.0"
 source = { editable = "apps/analysis" }
 dependencies = [
     { name = "blunder-shared" },
-    { name = "pyyaml" },
+    { name = "chess" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "blunder-shared", editable = "libs/shared" },
-    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "chess", specifier = ">=1.11.2" },
 ]
 
 [[package]]
@@ -170,12 +170,14 @@ source = { editable = "apps/ingestion" }
 dependencies = [
     { name = "blunder-client" },
     { name = "blunder-shared" },
+    { name = "chess" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "blunder-client", editable = "libs/client" },
     { name = "blunder-shared", editable = "libs/shared" },
+    { name = "chess", specifier = ">=1.11.2" },
 ]
 
 [[package]]
@@ -183,17 +185,17 @@ name = "blunder-shared"
 version = "0.1.0"
 source = { editable = "libs/shared" }
 dependencies = [
-    { name = "chess" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "pyyaml" },
     { name = "typer" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "chess", specifier = ">=1.11.2" },
     { name = "pydantic", specifier = ">=2.14.0" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "typer", specifier = ">=0.27.3" },
 ]
 
