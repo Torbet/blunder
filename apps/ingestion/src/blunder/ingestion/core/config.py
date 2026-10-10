@@ -13,8 +13,14 @@ class APISettings(BaseModel):
         return f"{protocol}://{self.host}:{self.port}"
 
 
+class IngestionSettings(BaseModel):
+    batch_size: int
+    concurrency: int
+
+
 class Settings(BaseSettings):
     api: APISettings
+    ingestion: IngestionSettings
 
     model_config = SettingsConfigDict(env_nested_delimiter="__", env_file=find_dotenv(), extra="ignore")
 

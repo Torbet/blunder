@@ -1,17 +1,17 @@
+import asyncio
 from collections.abc import Iterable
+from itertools import batched, groupby
 from uuid import UUID
 
 from blunder.client import Client
-from blunder.client.api.analyses import create_analysis
-from blunder.client.api.games import create_game
+from blunder.client.api.analyses import create_analyses
+from blunder.client.api.games import create_games
 from blunder.client.models import (
     AnalysisCreate,
-    AnalysisRead,
     Control,
     Elos,
     EvaluationConfig,
     GameCreate,
-    GameRead,
     MoveCreate,
     PipelineConfig,
     Players,
@@ -28,37 +28,48 @@ class Ingestor:
 
     async def ingest(self, records: Iterable[Record]) -> None:
         async with self.client:
-            for record in records:
-                match record.type:
-                    case "analysis":
-                        await self._ingest_analysis(record)
-                    case "game":
-                        await self._ingest_game(record)
+            for kind, group in groupby(records, lambda r: r.type):
+                batches = batched(group, settings.ingestion.batch_size)
+                for window in batched(batches, settings.ingestion.concurrency):
+                    await asyncio.gather(*(self._ingest(kind, batch) for batch in window))
 
-    async def _ingest_analysis(self, record: AnalysisRecord) -> None:
-        analysis = await create_analysis.asyncio(client=self.client, body=AnalysisCreate(config=self._config(record)))
-        if not isinstance(analysis, AnalysisRead):
-            raise TypeError("Failed to create analysis")
-        self.ids[record.id] = analysis.id
+    async def _ingest(self, kind: str, batch: tuple[Record, ...]) -> None:
+        match kind:
+            case "analysis":
+                await self._ingest_analysis([r for r in batch if r.type == "analysis"])
+            case "game":
+                await self._ingest_game([r for r in batch if r.type == "game"])
 
-    async def _ingest_game(self, record: GameRecord) -> None:
-        game = await create_game.asyncio(
-            client=self.client,
-            body=GameCreate(
-                result=Result(record.result),
-                players=Players(white=record.players.white, black=record.players.black),
-                elos=Elos(white=record.elos.white, black=record.elos.black),
-                control=Control(base=record.control.base, increment=record.control.increment),
-                played=record.played,
-                moves=[
-                    MoveCreate(ply=move.ply, uci=move.uci, evaluation=move.evaluation, time=move.time)
-                    for move in record.moves
-                ],
-            ),
+    async def _ingest_analysis(self, records: list[AnalysisRecord]) -> None:
+        analyses = await create_analyses.asyncio(
+            client=self.client, body=[AnalysisCreate(config=self._config(record)) for record in records]
         )
-        if not isinstance(game, GameRead):
+        if not isinstance(analyses, list):
+            raise TypeError("Failed to create analysis")
+
+        for record, analysis in zip(records, analyses, strict=True):
+            self.ids[record.id] = analysis.id
+
+    async def _ingest_game(self, records: list[GameRecord]) -> None:
+        games = await create_games.asyncio(
+            client=self.client,
+            body=[
+                GameCreate(
+                    result=Result(record.result),
+                    players=Players(white=record.players.white, black=record.players.black),
+                    elos=Elos(white=record.elos.white, black=record.elos.black),
+                    control=Control(base=record.control.base, increment=record.control.increment),
+                    played=record.played,
+                    moves=[
+                        MoveCreate(ply=move.ply, uci=move.uci, evaluation=move.evaluation, time=move.time)
+                        for move in record.moves
+                    ],
+                )
+                for record in records
+            ],
+        )
+        if not isinstance(games, list):
             raise TypeError("Failed to create game")
-        self.ids[record.id] = game.id
 
     @staticmethod
     def _config(record: AnalysisRecord) -> PipelineConfig:

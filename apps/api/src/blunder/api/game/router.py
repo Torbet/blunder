@@ -18,11 +18,14 @@ async def get_game(game_id: UUID, session: Session) -> GameRead:
 
 
 @router.post("/")
-async def create_game(body: GameCreate, session: Session) -> GameRead:
-    game = Game(
-        **body.model_dump(exclude={"moves"}),
-        moves=[Move(**move.model_dump()) for move in body.moves],
-    )
-    session.add(game)
+async def create_games(body: list[GameCreate], session: Session) -> list[GameRead]:
+    games = [
+        Game(
+            **game.model_dump(exclude={"moves"}),
+            moves=[Move(**move.model_dump()) for move in game.moves],
+        )
+        for game in body
+    ]
+    session.add_all(games)
     await session.commit()
-    return GameRead.model_validate(game)
+    return [GameRead.model_validate(game) for game in games]

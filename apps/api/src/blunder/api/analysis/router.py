@@ -18,8 +18,8 @@ async def get_analysis(analysis_id: UUID, session: Session) -> AnalysisRead:
 
 
 @router.post("/")
-async def create_analysis(body: AnalysisCreate, session: Session) -> AnalysisRead:
-    analysis = Analysis(**body.model_dump())
-    session.add(analysis)
+async def create_analyses(body: list[AnalysisCreate], session: Session) -> list[AnalysisRead]:
+    analyses = [Analysis(**analysis.model_dump()) for analysis in body]
+    session.add_all(analyses)
     await session.commit()
-    return AnalysisRead.model_validate(analysis)
+    return [AnalysisRead.model_validate(analysis) for analysis in analyses]
