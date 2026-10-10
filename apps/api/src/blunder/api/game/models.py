@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, UniqueConstraint, func
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -40,10 +40,24 @@ class Move(Base):
     ply: Mapped[int] = mapped_column(primary_key=True)
 
     uci: Mapped[str]
-    evaluation: Mapped[int | None]
     time: Mapped[float | None]
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     game: Mapped[Game] = relationship(back_populates="moves")
+
+
+class Feature(Base):
+    __tablename__ = "features"
+    __table_args__ = (ForeignKeyConstraint(["game_id", "ply"], ["moves.game_id", "moves.ply"], ondelete="CASCADE"),)
+
+    game_id: Mapped[UUID] = mapped_column(ForeignKey("games.id"), primary_key=True)
+    analysis_id: Mapped[UUID] = mapped_column(ForeignKey("analyses.id"), primary_key=True)
+    ply: Mapped[int] = mapped_column(primary_key=True)
+
+    evaluation: Mapped[int | None]
+    best: Mapped[str | None]
+
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

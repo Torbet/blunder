@@ -24,7 +24,7 @@ class Converter:
                 clocks = dict.fromkeys(chess.COLORS, control.base)
                 turn = game.turn()
 
-                moves: list[MoveBase] = []
+                moves = []
 
                 for ply, node in enumerate(game.mainline()):
                     clock, time = node.clock(), node.emt()

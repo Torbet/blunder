@@ -5,12 +5,13 @@ from uuid import UUID
 
 from blunder.client import Client
 from blunder.client.api.analyses import create_analyses
-from blunder.client.api.games import create_games
+from blunder.client.api.games import add_features, create_games
 from blunder.client.models import (
     AnalysisCreate,
     Control,
     Elos,
     EvaluationConfig,
+    FeatureCreate,
     GameCreate,
     MoveCreate,
     PipelineConfig,
@@ -60,16 +61,34 @@ class Ingestor:
                     elos=Elos(white=record.elos.white, black=record.elos.black),
                     control=Control(base=record.control.base, increment=record.control.increment),
                     played=record.played,
-                    moves=[
-                        MoveCreate(ply=move.ply, uci=move.uci, evaluation=move.evaluation, time=move.time)
-                        for move in record.moves
-                    ],
+                    moves=[MoveCreate(ply=move.ply, uci=move.uci, time=move.time) for move in record.moves],
                 )
                 for record in records
             ],
         )
         if not isinstance(games, list):
             raise TypeError("Failed to create game")
+
+        for record, game in zip(records, games, strict=True):
+            if not record.features:
+                continue
+
+            features = await add_features.asyncio(
+                client=self.client,
+                game_id=game.id,
+                body=[
+                    FeatureCreate(
+                        analysis_id=self.ids[feature.analysis_id],
+                        ply=feature.ply,
+                        evaluation=feature.evaluation,
+                        best=feature.best,
+                    )
+                    for feature in record.features
+                ],
+            )
+
+            if not isinstance(features, list):
+                raise TypeError("Failed to add features")
 
     @staticmethod
     def _config(record: AnalysisRecord) -> PipelineConfig:

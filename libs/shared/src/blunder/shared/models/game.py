@@ -38,9 +38,20 @@ class Game(Identifiable, GameBase): ...
 class MoveBase(BaseModel):
     ply: int
     uci: str
-    evaluation: int | None = None
     time: float | None = None
 
 
 class Move(Timestamped, MoveBase):
+    game_id: UUID
+
+
+class FeatureBase(BaseModel):
+    analysis_id: UUID
+    ply: int
+
+    evaluation: int | None = None
+    best: str | None = None
+
+
+class Feature(Timestamped, FeatureBase):
     game_id: UUID

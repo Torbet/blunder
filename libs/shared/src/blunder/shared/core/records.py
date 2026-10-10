@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, TypeAdapter
 
 from blunder.shared.models.analysis import AnalysisBase
-from blunder.shared.models.game import GameBase, MoveBase
+from blunder.shared.models.game import FeatureBase, GameBase, MoveBase
 
 
 class RecordBase(BaseModel):
@@ -20,6 +20,7 @@ class AnalysisRecord(RecordBase, AnalysisBase):
 class GameRecord(RecordBase, GameBase):
     type: Literal["game"] = "game"
     moves: list[MoveBase]
+    features: list[FeatureBase] = Field(default_factory=list)
 
 
 type Record = Annotated[GameRecord | AnalysisRecord, Field(discriminator="type")]

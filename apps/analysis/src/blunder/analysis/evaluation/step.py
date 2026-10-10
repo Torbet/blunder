@@ -4,6 +4,7 @@ from rich.progress import Progress
 
 from blunder.analysis.core.pipeline import PipelineContext, PipelineStep
 from blunder.shared.analysis.evaluation import EvaluationConfig
+from blunder.shared.models.game import FeatureBase
 
 
 class EvaluationStep(PipelineStep):
@@ -19,10 +20,20 @@ class EvaluationStep(PipelineStep):
 
             for game in ctx.games:
                 board = chess.Board()
+                info = await engine.analyse(board, limit)
+
                 for move in game.moves:
+                    best = info["pv"][0].uci()
                     board.push_uci(move.uci)
-                    evaluation = await engine.analyse(board, limit)
-                    move.evaluation = evaluation["score"].white().score(mate_score=10000)
+                    info = await engine.analyse(board, limit)
+                    game.features.append(
+                        FeatureBase(
+                            analysis_id=ctx.analysis.id,
+                            ply=move.ply,
+                            evaluation=info["score"].white().score(mate_score=10000),
+                            best=best,
+                        )
+                    )
                     progress.advance(task)
 
         await engine.quit()

@@ -1,4 +1,4 @@
-from blunder.shared.models.game import Game, GameBase, Move, MoveBase
+from blunder.shared.models.game import Feature, FeatureBase, Game, GameBase, Move, MoveBase
 
 
 class GameRead(Game):
@@ -13,3 +13,9 @@ class MoveRead(Move): ...
 
 
 class MoveCreate(MoveBase): ...
+
+
+class FeatureRead(Feature): ...
+
+
+class FeatureCreate(FeatureBase): ...
