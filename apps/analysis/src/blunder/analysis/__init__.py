@@ -3,15 +3,16 @@ from pathlib import Path
 
 import typer
 
-from blunder.analysis.core.pipeline import Pipeline, PipelineConfig
-from blunder.shared.core.records import GameRecord
+from blunder.analysis.core.pipeline import Pipeline
+from blunder.shared.analysis import PipelineConfig
+from blunder.shared.core.records import Records
 
 
 def analyse() -> None:
     def _command(config: Path, input: Path, output: Path) -> None:
         pipeline = Pipeline.build(PipelineConfig.load(config))
-        games = list(GameRecord.load(input))
-        asyncio.run(pipeline.run(games))
-        GameRecord.save(output, games)
+        records = list(Records.load(input))
+        asyncio.run(pipeline.run(records))
+        Records.save(records, output)
 
     typer.run(_command)

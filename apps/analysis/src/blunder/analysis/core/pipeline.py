@@ -1,34 +1,23 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
 
-import yaml
-from pydantic import BaseModel
-
-from blunder.shared.analysis.evaluation import EvaluationConfig
-from blunder.shared.core.records import GameRecord
-
-
-class PipelineConfig(BaseModel):
-    steps: list[EvaluationConfig]
-
-    @classmethod
-    def load(cls, path: Path) -> PipelineConfig:
-        with path.open() as file:
-            return cls.model_validate(yaml.safe_load(file))
+from blunder.shared.analysis import PipelineConfig
+from blunder.shared.core.records import AnalysisRecord, Record
 
 
 class PipelineStep(ABC):
     @abstractmethod
-    async def run(self, games: list[GameRecord]) -> None: ...
+    async def run(self, records: list[Record]) -> None: ...
 
 
 class Pipeline:
-    def __init__(self, steps: list[PipelineStep]) -> None:
+    def __init__(self, config: PipelineConfig, steps: list[PipelineStep]) -> None:
+        self.config = config
         self.steps = steps
 
-    async def run(self, games: list[GameRecord]) -> None:
+    async def run(self, records: list[Record]) -> None:
+        records.insert(0, AnalysisRecord(config=self.config))
         for step in self.steps:
-            await step.run(games)
+            await step.run(records)
 
     @classmethod
     def build(cls, config: PipelineConfig) -> Pipeline:
@@ -41,4 +30,4 @@ class Pipeline:
                 case "evaluation":
                     steps.append(EvaluationStep(step))
 
-        return cls(steps)
+        return cls(config, steps)

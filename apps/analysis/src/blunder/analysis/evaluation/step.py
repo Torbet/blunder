@@ -1,16 +1,18 @@
+import chess
 import chess.engine
 from rich.progress import Progress
 
 from blunder.analysis.core.pipeline import PipelineStep
 from blunder.shared.analysis.evaluation import EvaluationConfig
-from blunder.shared.core.records import GameRecord
+from blunder.shared.core.records import Record
 
 
 class EvaluationStep(PipelineStep):
     def __init__(self, config: EvaluationConfig) -> None:
         self.config = config
 
-    async def run(self, games: list[GameRecord]) -> None:
+    async def run(self, records: list[Record]) -> None:
+        games = [r for r in records if r.type == "game"]
         _, engine = await chess.engine.popen_uci("stockfish")
         limit = chess.engine.Limit(depth=self.config.depth)
 

@@ -10,7 +10,7 @@ router = APIRouter(prefix="/games", tags=["games"])
 
 
 @router.get("/{game_id}")
-async def read_game(game_id: UUID, session: Session) -> GameRead:
+async def get_game(game_id: UUID, session: Session) -> GameRead:
     game = await session.get(Game, game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
