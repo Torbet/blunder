@@ -1,12 +1,23 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 
 from blunder.shared.analysis import PipelineConfig
-from blunder.shared.core.records import AnalysisRecord, Record
+from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
+
+
+class PipelineContext:
+    def __init__(self, analysis: AnalysisRecord, records: Iterable[Record]) -> None:
+        self.analysis = analysis
+        self.records = [analysis, *records]
+
+    @property
+    def games(self) -> list[GameRecord]:
+        return [r for r in self.records if r.type == "game"]
 
 
 class PipelineStep(ABC):
     @abstractmethod
-    async def run(self, records: list[Record]) -> None: ...
+    async def run(self, ctx: PipelineContext) -> None: ...
 
 
 class Pipeline:
@@ -14,10 +25,11 @@ class Pipeline:
         self.config = config
         self.steps = steps
 
-    async def run(self, records: list[Record]) -> None:
-        records.insert(0, AnalysisRecord(config=self.config))
+    async def run(self, records: Iterable[Record]) -> list[Record]:
+        ctx = PipelineContext(AnalysisRecord(config=self.config), records)
         for step in self.steps:
-            await step.run(records)
+            await step.run(ctx)
+        return ctx.records
 
     @classmethod
     def build(cls, config: PipelineConfig) -> Pipeline:

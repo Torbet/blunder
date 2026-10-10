@@ -11,8 +11,7 @@ from blunder.shared.core.records import Records
 def analyse() -> None:
     def _command(config: Path, input: Path, output: Path) -> None:
         pipeline = Pipeline.build(PipelineConfig.load(config))
-        records = list(Records.load(input))
-        asyncio.run(pipeline.run(records))
+        records = asyncio.run(pipeline.run(Records.load(input)))
         Records.save(records, output)
 
     typer.run(_command)
