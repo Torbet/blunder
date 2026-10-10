@@ -9,7 +9,7 @@ from blunder.shared.core.records import GameRecord
 
 class Ingestor:
     async def ingest(self, records: Iterable[GameRecord]) -> None:
-        async with Client(base_url=settings().api.url) as client:
+        async with Client(base_url=settings.api.url) as client:
             for record in records:
                 game = await create_game.asyncio(
                     client=client,

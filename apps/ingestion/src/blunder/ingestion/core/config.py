@@ -21,5 +21,4 @@ class Settings(BaseSettings):
     )
 
 
-def settings() -> Settings:
-    return Settings()
+settings = Settings()
