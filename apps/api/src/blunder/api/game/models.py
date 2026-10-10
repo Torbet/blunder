@@ -24,7 +24,7 @@ class Game(Base):
         back_populates="game",
         lazy="selectin",
         cascade="all, delete-orphan",
-        order_by="Move.index",
+        order_by="Move.ply",
     )
 
 
@@ -32,7 +32,7 @@ class Move(Base):
     __tablename__ = "moves"
 
     game_id: Mapped[UUID] = mapped_column(ForeignKey("games.id"), primary_key=True)
-    index: Mapped[int] = mapped_column(primary_key=True)
+    ply: Mapped[int] = mapped_column(primary_key=True)
 
     uci: Mapped[str]
     evaluation: Mapped[int | None]
