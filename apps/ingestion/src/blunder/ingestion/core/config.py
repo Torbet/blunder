@@ -16,9 +16,7 @@ class APISettings(BaseModel):
 class Settings(BaseSettings):
     api: APISettings
 
-    model_config = SettingsConfigDict(
-        env_nested_delimiter="__", env_file=find_dotenv(), extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_nested_delimiter="__", env_file=find_dotenv(), extra="ignore")
 
 
 settings = Settings()

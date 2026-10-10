@@ -1,21 +1,26 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import ForeignKey, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from blunder.api.core.database import Base
-from blunder.shared.models.game import Elos, Result
+from blunder.shared.models.game import Control, Elos, Players, Result
 
 
 class Game(Base):
     __tablename__ = "games"
+    __table_args__ = (UniqueConstraint("players", "played"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
 
-    elos: Mapped[Elos] = mapped_column(JSONB)
     result: Mapped[Result]
+    players: Mapped[Players] = mapped_column(JSONB)
+    elos: Mapped[Elos] = mapped_column(JSONB)
+    control: Mapped[Control] = mapped_column(JSONB)
+
+    played: Mapped[datetime]
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
@@ -8,14 +9,27 @@ from blunder.shared.models import Identifiable, Timestamped
 type Result = Literal["white", "black", "draw"]
 
 
+class Players(BaseModel):
+    white: str
+    black: str
+
+
 class Elos(BaseModel):
     white: int
     black: int
 
 
+class Control(BaseModel):
+    base: float
+    increment: float
+
+
 class GameBase(BaseModel):
     result: Result
+    players: Players
     elos: Elos
+    control: Control
+    played: datetime
 
 
 class Game(Identifiable, GameBase): ...
