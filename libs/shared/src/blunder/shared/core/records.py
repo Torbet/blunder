@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
+import chess
 from pydantic import BaseModel, Field, TypeAdapter
 
 from blunder.shared.models.analysis import AnalysisBase
@@ -21,6 +22,14 @@ class GameRecord(RecordBase, GameBase):
     type: Literal["game"] = "game"
     moves: list[MoveBase]
     features: list[FeatureBase] = Field(default_factory=list)
+
+    def positions(self) -> Iterator[chess.Board]:
+        board = chess.Board()
+        yield board.copy()
+
+        for move in self.moves:
+            board.push_uci(move.uci)
+            yield board.copy()
 
 
 type Record = Annotated[GameRecord | AnalysisRecord, Field(discriminator="type")]

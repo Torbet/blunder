@@ -3,7 +3,6 @@ name = "blunder-analysis"
 version = "0.1.0"
 dependencies = [
     "blunder-shared",
-    "chess>=1.11.2",
 ]
 
 [project.scripts]

@@ -4,7 +4,6 @@ version = "0.1.0"
 dependencies = [
     "blunder-client",
     "blunder-shared",
-    "chess>=1.11.2",
 ]
 
 [project.scripts]
