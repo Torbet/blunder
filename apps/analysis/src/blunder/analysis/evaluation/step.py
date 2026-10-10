@@ -19,7 +19,7 @@ class EvaluationStep(PipelineStep):
 
             for game in games:
                 for move in game.moves:
-                    board = game.board(move.index + 1)
+                    board = game.board(move.ply + 1)
                     evaluation = await engine.analyse(board, limit)
                     move.evaluation = evaluation["score"].white().score(mate_score=10000)
                     progress.advance(task)

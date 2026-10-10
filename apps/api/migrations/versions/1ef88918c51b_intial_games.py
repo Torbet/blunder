@@ -34,14 +34,14 @@ def upgrade() -> None:
     op.create_table(
         "moves",
         sa.Column("game_id", sa.Uuid(), nullable=False),
-        sa.Column("index", sa.Integer(), nullable=False),
+        sa.Column("ply", sa.Integer(), nullable=False),
         sa.Column("uci", sa.String(), nullable=False),
         sa.Column("evaluation", sa.Integer(), nullable=True),
         sa.Column("time", sa.Double(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(["game_id"], ["games.id"], name=op.f("fk_moves_game_id_games")),
-        sa.PrimaryKeyConstraint("game_id", "index", name=op.f("pk_moves")),
+        sa.PrimaryKeyConstraint("game_id", "ply", name=op.f("pk_moves")),
     )
     # ### end Alembic commands ###
 

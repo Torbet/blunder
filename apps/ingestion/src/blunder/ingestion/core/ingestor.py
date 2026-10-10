@@ -18,7 +18,7 @@ class Ingestor:
                         elos=Elos(white=record.elos.white, black=record.elos.black),
                         moves=[
                             MoveCreate(
-                                index=move.index,
+                                ply=move.ply,
                                 uci=move.uci,
                                 evaluation=move.evaluation,
                                 time=move.time,

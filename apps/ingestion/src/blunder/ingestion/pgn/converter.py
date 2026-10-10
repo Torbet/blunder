@@ -25,7 +25,7 @@ class Converter:
 
                 moves: list[MoveBase] = []
 
-                for index, node in enumerate(game.mainline()):
+                for ply, node in enumerate(game.mainline()):
                     clock, time = node.clock(), None
 
                     if clock is not None:
@@ -34,7 +34,7 @@ class Converter:
 
                     moves.append(
                         MoveBase(
-                            index=index,
+                            ply=ply,
                             uci=node.move.uci(),
                             time=time,
                         )

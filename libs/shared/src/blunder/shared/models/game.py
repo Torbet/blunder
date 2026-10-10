@@ -22,7 +22,7 @@ class Game(Identifiable, GameBase): ...
 
 
 class MoveBase(BaseModel):
-    index: int
+    ply: int
     uci: str
     evaluation: int | None = None
     time: float | None = None
