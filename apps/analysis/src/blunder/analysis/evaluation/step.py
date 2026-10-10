@@ -18,8 +18,9 @@ class EvaluationStep(PipelineStep):
             task = progress.add_task("Evaluating", total=sum(len(game.moves) for game in games))
 
             for game in games:
+                board = chess.Board()
                 for move in game.moves:
-                    board = game.board(move.ply + 1)
+                    board.push_uci(move.uci)
                     evaluation = await engine.analyse(board, limit)
                     move.evaluation = evaluation["score"].white().score(mate_score=10000)
                     progress.advance(task)

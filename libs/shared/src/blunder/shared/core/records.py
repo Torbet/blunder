@@ -20,8 +20,3 @@ class GameRecord(GameBase):
             for line in f:
                 yield cls.model_validate_json(line)
 
-    def board(self, ply: int) -> chess.Board:
-        board = chess.Board()
-        for move in self.moves[:ply]:
-            board.push_uci(move.uci)
-        return board
