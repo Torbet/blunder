@@ -120,11 +120,15 @@ name = "blunder-analysis"
 version = "0.1.0"
 source = { editable = "apps/analysis" }
 dependencies = [
+    { name = "blunder-maia" },
     { name = "blunder-shared" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "blunder-shared", editable = "libs/shared" }]
+requires-dist = [
+    { name = "blunder-maia", editable = "libs/maia" },
+    { name = "blunder-shared", editable = "libs/shared" },
+]
 
 [[package]]
 name = "blunder-api"

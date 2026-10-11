@@ -2,6 +2,7 @@
 name = "blunder-analysis"
 version = "0.1.0"
 dependencies = [
+    "blunder-maia",
     "blunder-shared",
 ]
 
@@ -16,4 +17,5 @@ build-backend = "hatchling.build"
 packages = ["src/blunder"]
 
 [tool.uv.sources]
+blunder-maia = { workspace = true }
 blunder-shared = { workspace = true }

@@ -10,7 +10,6 @@ import chess.engine
 from blunder.analysis.core.pipeline import PipelineContext, PipelineStep
 from blunder.shared.analysis.evaluation import EvaluationConfig
 from blunder.shared.core.records import GameRecord
-from blunder.shared.models.game import FeatureBase
 
 MATE = 10000
 
@@ -41,11 +40,6 @@ class EvaluationStep(PipelineStep):
             infos = [await engine.analyse(board, self.limit, game=game.id) for board in game.positions()]
 
             for move, (before, after) in zip(game.moves, pairwise(infos), strict=True):
-                game.features.append(
-                    FeatureBase(
-                        analysis_id=analysis,
-                        ply=move.ply,
-                        evaluation=after["score"].white().score(mate_score=MATE),
-                        best=before["pv"][0].uci(),
-                    )
-                )
+                feature = game.feature(analysis, move.ply)
+                feature.evaluation = after["score"].white().score(mate_score=MATE)
+                feature.best = before["pv"][0].uci()

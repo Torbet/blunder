@@ -59,5 +59,13 @@ class Feature(Base):
     evaluation: Mapped[int | None]
     best: Mapped[str | None]
 
+    probability: Mapped[float | None]
+    entropy: Mapped[float | None]
+    ponder: Mapped[float | None]
+
+    win: Mapped[float | None]
+    draw: Mapped[float | None]
+    loss: Mapped[float | None]
+
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

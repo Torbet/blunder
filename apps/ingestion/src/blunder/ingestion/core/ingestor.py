@@ -13,6 +13,7 @@ from blunder.client.models import (
     EvaluationConfig,
     FeatureCreate,
     GameCreate,
+    MaiaConfig,
     MoveCreate,
     PipelineConfig,
     Players,
@@ -82,6 +83,12 @@ class Ingestor:
                         ply=feature.ply,
                         evaluation=feature.evaluation,
                         best=feature.best,
+                        probability=feature.probability,
+                        entropy=feature.entropy,
+                        ponder=feature.ponder,
+                        win=feature.win,
+                        draw=feature.draw,
+                        loss=feature.loss,
                     )
                     for feature in record.features
                 ],
@@ -97,4 +104,6 @@ class Ingestor:
             match step.type:
                 case "evaluation":
                     steps.append(EvaluationConfig(depth=step.depth))
+                case "maia":
+                    steps.append(MaiaConfig(model=step.model, batch=step.batch))
         return PipelineConfig(chunk=record.config.chunk, steps=steps)

@@ -52,6 +52,14 @@ class FeatureBase(BaseModel):
     evaluation: int | None = None
     best: str | None = None
 
+    probability: float | None = None
+    entropy: float | None = None
+    ponder: float | None = None
+
+    win: float | None = None
+    draw: float | None = None
+    loss: float | None = None
+
 
 class Feature(Timestamped, FeatureBase):
     game_id: UUID
