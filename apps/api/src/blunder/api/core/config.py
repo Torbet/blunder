@@ -1,3 +1,5 @@
+from functools import cache
+
 from dotenv import find_dotenv
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,4 +28,6 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__", env_file=find_dotenv(), extra="ignore")
 
 
-settings = Settings()
+@cache
+def settings() -> Settings:
+    return Settings()

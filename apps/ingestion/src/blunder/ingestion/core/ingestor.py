@@ -24,14 +24,14 @@ from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
 
 class Ingestor:
     def __init__(self) -> None:
-        self.client = Client(base_url=settings.api.url)
+        self.client = Client(base_url=settings().api.url)
         self.ids: dict[UUID, UUID] = {}
 
     async def ingest(self, records: Iterable[Record]) -> None:
         async with self.client:
             for kind, group in groupby(records, lambda r: r.type):
-                batches = batched(group, settings.ingestion.batch_size)
-                for window in batched(batches, settings.ingestion.concurrency):
+                batches = batched(group, settings().ingestion.batch_size)
+                for window in batched(batches, settings().ingestion.concurrency):
                     await asyncio.gather(*(self._ingest(kind, batch) for batch in window))
 
     async def _ingest(self, kind: str, batch: tuple[Record, ...]) -> None:
