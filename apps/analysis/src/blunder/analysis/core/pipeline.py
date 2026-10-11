@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
+from collections.abc import AsyncGenerator, Iterable
+from contextlib import AsyncExitStack, asynccontextmanager
+from itertools import batched
 
 from blunder.shared.analysis import PipelineConfig
 from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
@@ -8,7 +10,7 @@ from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
 class PipelineContext:
     def __init__(self, analysis: AnalysisRecord, records: Iterable[Record]) -> None:
         self.analysis = analysis
-        self.records = [analysis, *records]
+        self.records = list(records)
 
     @property
     def games(self) -> list[GameRecord]:
@@ -16,6 +18,10 @@ class PipelineContext:
 
 
 class PipelineStep(ABC):
+    @asynccontextmanager
+    async def open(self) -> AsyncGenerator[None]:
+        yield
+
     @abstractmethod
     async def run(self, ctx: PipelineContext) -> None: ...
 
@@ -25,11 +31,20 @@ class Pipeline:
         self.config = config
         self.steps = steps
 
-    async def run(self, records: Iterable[Record]) -> list[Record]:
-        ctx = PipelineContext(AnalysisRecord(config=self.config), records)
-        for step in self.steps:
-            await step.run(ctx)
-        return ctx.records
+    async def run(self, records: Iterable[Record]) -> AsyncGenerator[Record]:
+        analysis = AnalysisRecord(config=self.config)
+        yield analysis
+
+        async with AsyncExitStack() as stack:
+            for step in self.steps:
+                await stack.enter_async_context(step.open())
+
+            for chunk in batched(records, self.config.chunk):
+                ctx = PipelineContext(analysis, chunk)
+                for step in self.steps:
+                    await step.run(ctx)
+                for record in ctx.records:
+                    yield record
 
     @classmethod
     def build(cls, config: PipelineConfig) -> Pipeline:

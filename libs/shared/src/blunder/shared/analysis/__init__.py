@@ -7,6 +7,7 @@ from blunder.shared.analysis.evaluation import EvaluationConfig
 
 
 class PipelineConfig(BaseModel):
+    chunk: int
     steps: list[EvaluationConfig]
 
     @classmethod

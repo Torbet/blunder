@@ -46,6 +46,10 @@ class Records:
                 yield cls.adapter.validate_json(line)
 
     @staticmethod
-    def save(records: Iterable[Record], path: Path) -> None:
+    def dump(record: Record) -> str:
+        return record.model_dump_json() + "\n"
+
+    @classmethod
+    def save(cls, records: Iterable[Record], path: Path) -> None:
         with path.open("w") as f:
-            f.writelines(record.model_dump_json() + "\n" for record in records)
+            f.writelines(map(cls.dump, records))

@@ -97,4 +97,4 @@ class Ingestor:
             match step.type:
                 case "evaluation":
                     steps.append(EvaluationConfig(depth=step.depth))
-        return PipelineConfig(steps=steps)
+        return PipelineConfig(chunk=record.config.chunk, steps=steps)
