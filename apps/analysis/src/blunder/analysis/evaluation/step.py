@@ -1,30 +1,40 @@
+import asyncio
+import os
+from collections.abc import Iterable
 from itertools import pairwise
+from uuid import UUID
 
 import chess.engine
 from rich import progress
 
 from blunder.analysis.core.pipeline import PipelineContext, PipelineStep
 from blunder.shared.analysis.evaluation import EvaluationConfig
+from blunder.shared.core.records import GameRecord
 from blunder.shared.models.game import FeatureBase
+
+MATE = 10000
 
 
 class EvaluationStep(PipelineStep):
     def __init__(self, config: EvaluationConfig) -> None:
-        self.config = config
+        self.limit = chess.engine.Limit(depth=config.depth)
 
     async def run(self, ctx: PipelineContext) -> None:
-        _, engine = await chess.engine.popen_uci("stockfish")
-        limit = chess.engine.Limit(depth=self.config.depth)
+        games = progress.track(ctx.games, description="Evaluating")
+        await asyncio.gather(*(self.work(ctx.analysis.id, games) for _ in range(os.process_cpu_count() or 1)))
 
-        for game in progress.track(ctx.games, description="Evaluating"):
-            infos = [await engine.analyse(board, limit, game=game.id) for board in game.positions()]
+    async def work(self, analysis: UUID, games: Iterable[GameRecord]) -> None:
+        _, engine = await chess.engine.popen_uci("stockfish")
+
+        for game in games:
+            infos = [await engine.analyse(board, self.limit, game=game.id) for board in game.positions()]
 
             for move, (before, after) in zip(game.moves, pairwise(infos), strict=True):
                 game.features.append(
                     FeatureBase(
-                        analysis_id=ctx.analysis.id,
+                        analysis_id=analysis,
                         ply=move.ply,
-                        evaluation=after["score"].white().score(mate_score=10000),
+                        evaluation=after["score"].white().score(mate_score=MATE),
                         best=before["pv"][0].uci(),
                     )
                 )
