@@ -58,15 +58,15 @@ class Pipeline:
 
     @classmethod
     def build(cls, config: PipelineConfig) -> Pipeline:
-        from blunder.analysis.evaluation.step import EvaluationStep
         from blunder.analysis.maia.step import MaiaStep
+        from blunder.analysis.stockfish.step import StockfishStep
 
         steps: list[PipelineStep] = []
 
         for step in config.steps:
             match step.type:
-                case "evaluation":
-                    steps.append(EvaluationStep(step))
+                case "stockfish":
+                    steps.append(StockfishStep(step))
                 case "maia":
                     steps.append(MaiaStep(step))
 

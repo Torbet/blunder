@@ -4,13 +4,13 @@ from typing import Annotated
 import yaml
 from pydantic import BaseModel, Field
 
-from blunder.shared.analysis.evaluation import EvaluationConfig
 from blunder.shared.analysis.maia import MaiaConfig
+from blunder.shared.analysis.stockfish import StockfishConfig
 
 
 class PipelineConfig(BaseModel):
     chunk: int
-    steps: list[Annotated[EvaluationConfig | MaiaConfig, Field(discriminator="type")]]
+    steps: list[Annotated[StockfishConfig | MaiaConfig, Field(discriminator="type")]]
 
     @classmethod
     def load(cls, path: Path) -> PipelineConfig:

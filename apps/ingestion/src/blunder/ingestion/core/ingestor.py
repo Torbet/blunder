@@ -10,7 +10,6 @@ from blunder.client.models import (
     AnalysisCreate,
     Control,
     Elos,
-    EvaluationConfig,
     FeatureCreate,
     GameCreate,
     MaiaConfig,
@@ -18,6 +17,7 @@ from blunder.client.models import (
     PipelineConfig,
     Players,
     Result,
+    StockfishConfig,
 )
 from blunder.ingestion.core.config import settings
 from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
@@ -102,8 +102,8 @@ class Ingestor:
         steps = []
         for step in record.config.steps:
             match step.type:
-                case "evaluation":
-                    steps.append(EvaluationConfig(depth=step.depth))
+                case "stockfish":
+                    steps.append(StockfishConfig(depth=step.depth))
                 case "maia":
                     steps.append(MaiaConfig(model=step.model, batch=step.batch))
         return PipelineConfig(chunk=record.config.chunk, steps=steps)

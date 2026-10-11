@@ -7,14 +7,14 @@ from itertools import pairwise
 import chess.engine
 
 from blunder.analysis.core.pipeline import PipelineContext, PipelineStep
-from blunder.shared.analysis.evaluation import EvaluationConfig
+from blunder.shared.analysis.stockfish import StockfishConfig
 from blunder.shared.core.records import GameRecord
 
 MATE = 10000
 
 
-class EvaluationStep(PipelineStep):
-    def __init__(self, config: EvaluationConfig) -> None:
+class StockfishStep(PipelineStep):
+    def __init__(self, config: StockfishConfig) -> None:
         self.limit = chess.engine.Limit(depth=config.depth)
         self.engines: list[chess.engine.UciProtocol] = []
 
