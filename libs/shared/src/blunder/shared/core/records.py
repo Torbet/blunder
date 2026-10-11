@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 import chess
 from pydantic import BaseModel, Field, TypeAdapter
+from rich import progress
 
 from blunder.shared.models.analysis import AnalysisBase
 from blunder.shared.models.game import FeatureBase, GameBase, MoveBase
@@ -40,7 +41,7 @@ class Records:
 
     @classmethod
     def load(cls, path: Path) -> Iterator[Record]:
-        with path.open() as f:
+        with progress.open(path, "r", description="Loading") as f:
             for line in f:
                 yield cls.adapter.validate_json(line)
 

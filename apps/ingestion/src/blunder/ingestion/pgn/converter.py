@@ -4,6 +4,7 @@ from pathlib import Path
 
 import chess
 import chess.pgn
+from rich import progress
 
 from blunder.shared.core.records import GameRecord
 from blunder.shared.models.game import Control, Elos, MoveBase, Players, Result
@@ -17,7 +18,7 @@ RESULTS: dict[str, Result] = {
 
 class Converter:
     def convert(self, path: Path) -> Iterator[GameRecord]:
-        with path.open() as f:
+        with progress.open(path, "r", description="Converting") as f:
             while game := chess.pgn.read_game(f):
                 base, _, increment = game.headers["TimeControl"].partition("+")
                 control = Control(base=float(base), increment=float(increment or 0))
