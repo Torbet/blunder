@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import AsyncGenerator
 from datetime import datetime
 from pathlib import Path
 
@@ -17,7 +17,7 @@ RESULTS: dict[str, Result] = {
 
 
 class Converter:
-    def convert(self, path: Path) -> Iterator[GameRecord]:
+    async def convert(self, path: Path) -> AsyncGenerator[GameRecord]:
         with progress.open(path, "r", description="Converting") as f:
             while game := chess.pgn.read_game(f):
                 base, _, increment = game.headers["TimeControl"].partition("+")

@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Iterator
+from collections.abc import AsyncIterable, Iterator
 from pathlib import Path
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
@@ -46,10 +46,7 @@ class Records:
                 yield cls.adapter.validate_json(line)
 
     @staticmethod
-    def dump(record: Record) -> str:
-        return record.model_dump_json() + "\n"
-
-    @classmethod
-    def save(cls, records: Iterable[Record], path: Path) -> None:
+    async def save(records: AsyncIterable[Record], path: Path) -> None:
         with path.open("w") as f:
-            f.writelines(map(cls.dump, records))
+            async for record in records:
+                f.write(record.model_dump_json() + "\n")
