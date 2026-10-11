@@ -5,6 +5,7 @@ from itertools import batched
 
 from blunder.shared.analysis import PipelineConfig
 from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
+from blunder.shared.models.game import FeatureBase
 
 
 class PipelineContext:
@@ -15,6 +16,15 @@ class PipelineContext:
     @property
     def games(self) -> list[GameRecord]:
         return [r for r in self.records if r.type == "game"]
+
+    def feature(self, game: GameRecord, ply: int) -> FeatureBase:
+        for feature in game.features:
+            if feature.analysis_id == self.analysis.id and feature.ply == ply:
+                return feature
+
+        feature = FeatureBase(analysis_id=self.analysis.id, ply=ply)
+        game.features.append(feature)
+        return feature
 
 
 class PipelineStep(ABC):

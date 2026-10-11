@@ -16,7 +16,7 @@ class MaiaStep(PipelineStep):
 
         for game in games:
             for move, prediction in zip(game.moves, islice(predictions, len(game.moves)), strict=True):
-                feature = game.feature(ctx.analysis.id, move.ply)
+                feature = ctx.feature(game, move.ply)
                 feature.probability = prediction.policy[move.uci]
                 feature.entropy = prediction.entropy
                 feature.ponder = prediction.ponder

@@ -32,15 +32,6 @@ class GameRecord(RecordBase, GameBase):
             board.push_uci(move.uci)
             yield board.copy()
 
-    def feature(self, analysis: UUID, ply: int) -> FeatureBase:
-        for feature in self.features:
-            if feature.analysis_id == analysis and feature.ply == ply:
-                return feature
-
-        feature = FeatureBase(analysis_id=analysis, ply=ply)
-        self.features.append(feature)
-        return feature
-
 
 type Record = Annotated[GameRecord | AnalysisRecord, Field(discriminator="type")]
 
