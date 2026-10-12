@@ -35,16 +35,14 @@ class Converter:
         with path.open() as f:
             games = islice(iter(lambda: chess.pgn.read_game(f), None), limit)
 
-            for game in filter(self.supported, progress.track(games, total=limit, description="Converting")):
-                yield self.record(game)
+            for game in progress.track(games, total=limit, description="Converting"):
+                if not game.errors and self.supported(game.headers):
+                    yield self.record(game)
 
     @staticmethod
-    def supported(game: chess.pgn.Game) -> bool:
-        headers = game.headers
-
+    def supported(headers: chess.pgn.Headers) -> bool:
         return (
-            not game.errors
-            and CONTROL.fullmatch(headers.get("TimeControl", "")) is not None
+            CONTROL.fullmatch(headers.get("TimeControl", "")) is not None
             and "FEN" not in headers
             and headers.get("Variant", "Standard") == "Standard"
         )
@@ -57,12 +55,22 @@ class Converter:
 
         raise ValueError(f"Unrecognised PGN source: {headers.get('Site')}")
 
+    @staticmethod
+    def control(headers: chess.pgn.Headers) -> Control:
+        base, _, increment = headers["TimeControl"].partition("+")
+        return Control(base=float(base), increment=float(increment or 0))
+
+    @staticmethod
+    def played(headers: chess.pgn.Headers) -> datetime:
+        date = headers["Date"].replace(".", "-")
+        time = headers.get("UTCTime") or headers["Time"]
+        return datetime.fromisoformat(f"{date} {time}")
+
     @classmethod
     def record(cls, game: chess.pgn.Game) -> GameRecord:
         headers = game.headers
-        base, _, increment = headers["TimeControl"].partition("+")
         source, key = cls.identify(headers)
-        control = Control(base=float(base), increment=float(increment or 0))
+        control = cls.control(headers)
         clocks = {"white": control.base, "black": control.base}
         engines = [color for color, header in ENGINES.items() if headers.get(header) == "Yes"]
 
@@ -81,8 +89,6 @@ class Converter:
             if color in engines:
                 labels.append(LabelBase(color=color, ply=ply))
 
-        hour = headers.get("UTCTime") or headers["Time"]
-
         return GameRecord(
             source=source,
             key=key,
@@ -90,7 +96,7 @@ class Converter:
             result=RESULTS[headers["Result"]],
             elos=Elos(white=int(headers["WhiteElo"]), black=int(headers["BlackElo"])),
             control=control,
-            played=datetime.fromisoformat(f"{headers['Date'].replace('.', '-')} {hour}"),
+            played=cls.played(headers),
             moves=moves,
             labels=labels,
         )
