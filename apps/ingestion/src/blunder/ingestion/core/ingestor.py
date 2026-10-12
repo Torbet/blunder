@@ -3,6 +3,8 @@ from collections.abc import Iterable
 from itertools import batched, groupby
 from uuid import UUID
 
+from rich import progress
+
 from blunder.client import Client
 from blunder.client.api.analyses import create_analyses
 from blunder.client.api.games import add_features, create_games
@@ -28,12 +30,16 @@ class Ingestor:
         self.client = Client(base_url=settings().api.url)
         self.ids: dict[UUID, UUID] = {}
 
-    async def ingest(self, records: Iterable[Record]) -> None:
-        async with self.client:
-            for kind, group in groupby(records, lambda r: r.type):
-                batches = batched(group, settings().ingestion.batch_size)
-                for window in batched(batches, settings().ingestion.concurrency):
-                    await asyncio.gather(*(self._ingest(kind, batch) for batch in window))
+    async def ingest(self, records: Iterable[Record], total: int | None = None) -> None:
+        with progress.Progress() as bars:
+            task = bars.add_task("Ingesting", total=total)
+
+            async with self.client:
+                for kind, group in groupby(records, lambda r: r.type):
+                    batches = batched(group, settings().ingestion.batch_size)
+                    for window in batched(batches, settings().ingestion.concurrency):
+                        await asyncio.gather(*(self._ingest(kind, batch) for batch in window))
+                        bars.advance(task, sum(map(len, window)))
 
     async def _ingest(self, kind: str, batch: tuple[Record, ...]) -> None:
         match kind:

@@ -3,6 +3,8 @@ from collections.abc import AsyncGenerator, Iterable
 from contextlib import AsyncExitStack, asynccontextmanager
 from itertools import batched
 
+from rich import progress
+
 from blunder.shared.analysis import PipelineConfig
 from blunder.shared.core.records import AnalysisRecord, GameRecord, Record
 from blunder.shared.models.game import FeatureBase
@@ -41,18 +43,22 @@ class Pipeline:
         self.config = config
         self.steps = steps
 
-    async def run(self, records: Iterable[Record]) -> AsyncGenerator[Record]:
+    async def run(self, records: Iterable[Record], total: int | None = None) -> AsyncGenerator[Record]:
         analysis = AnalysisRecord(config=self.config)
         yield analysis
 
         async with AsyncExitStack() as stack:
+            bars = stack.enter_context(progress.Progress())
+            tasks = [bars.add_task(config.type.capitalize(), total=total) for config in self.config.steps]
+
             for step in self.steps:
                 await stack.enter_async_context(step.open())
 
             for chunk in batched(records, self.config.chunk):
                 ctx = PipelineContext(analysis, chunk)
-                for step in self.steps:
+                for task, step in zip(tasks, self.steps, strict=True):
                     await step.run(ctx)
+                    bars.advance(task, len(chunk))
                 for record in ctx.records:
                     yield record
 

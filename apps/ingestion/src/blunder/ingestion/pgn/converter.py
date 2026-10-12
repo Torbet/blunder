@@ -24,8 +24,10 @@ ENGINES: dict[Color, str] = {
 
 class Converter:
     async def convert(self, path: Path, limit: int | None = None) -> AsyncGenerator[GameRecord]:
-        with progress.open(path, "r", description="Converting") as f:
-            for game in islice(iter(lambda: chess.pgn.read_game(f), None), limit):
+        with path.open() as f:
+            games = islice(iter(lambda: chess.pgn.read_game(f), None), limit)
+
+            for game in progress.track(games, total=limit, description="Converting"):
                 base, _, increment = game.headers["TimeControl"].partition("+")
                 control = Control(base=float(base), increment=float(increment or 0))
                 clocks = dict.fromkeys(chess.COLORS, control.base)

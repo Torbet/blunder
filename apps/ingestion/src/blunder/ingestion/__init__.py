@@ -10,7 +10,7 @@ from blunder.shared.core.records import Records
 
 def ingest() -> None:
     def _command(input: Path) -> None:
-        asyncio.run(Ingestor().ingest(Records.load(input)))
+        asyncio.run(Ingestor().ingest(Records.load(input), total=Records.count(input)))
 
     typer.run(_command)
 
