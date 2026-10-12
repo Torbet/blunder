@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from blunder.shared.models import Identifiable, Timestamped
 
+type Color = Literal["white", "black"]
 type Result = Literal["white", "black", "draw"]
 
 
@@ -63,3 +64,8 @@ class FeatureBase(BaseModel):
 
 class Feature(Timestamped, FeatureBase):
     game_id: UUID
+
+
+class LabelBase(BaseModel):
+    color: Color
+    ply: int | None = None

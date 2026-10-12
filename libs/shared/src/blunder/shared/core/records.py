@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 from rich import progress
 
 from blunder.shared.models.analysis import AnalysisBase
-from blunder.shared.models.game import FeatureBase, GameBase, MoveBase
+from blunder.shared.models.game import FeatureBase, GameBase, LabelBase, MoveBase
 
 
 class RecordBase(BaseModel):
@@ -22,6 +22,7 @@ class AnalysisRecord(RecordBase, AnalysisBase):
 class GameRecord(RecordBase, GameBase):
     type: Literal["game"] = "game"
     moves: list[MoveBase]
+    labels: list[LabelBase] = Field(default_factory=list)
     features: list[FeatureBase] = Field(default_factory=list)
 
     def positions(self) -> Iterator[chess.Board]:
