@@ -8,6 +8,7 @@ from blunder.shared.models import Identifiable, Timestamped
 
 type Color = Literal["white", "black"]
 type Result = Literal["white", "black", "draw"]
+type Source = Literal["fics", "synthetic", "chesscom", "lichess"]
 
 
 class Players(BaseModel):
@@ -26,6 +27,9 @@ class Control(BaseModel):
 
 
 class GameBase(BaseModel):
+    source: Source
+    key: str
+
     result: Result
     players: Players
     elos: Elos

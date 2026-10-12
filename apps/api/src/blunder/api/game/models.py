@@ -6,14 +6,17 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from blunder.api.core.database import Base
-from blunder.shared.models.game import Control, Elos, Players, Result
+from blunder.shared.models.game import Control, Elos, Players, Result, Source
 
 
 class Game(Base):
     __tablename__ = "games"
-    __table_args__ = (UniqueConstraint("players", "played"),)
+    __table_args__ = (UniqueConstraint("source", "key"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+
+    source: Mapped[Source]
+    key: Mapped[str]
 
     result: Mapped[Result]
     players: Mapped[Players] = mapped_column(JSONB)

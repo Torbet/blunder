@@ -61,6 +61,8 @@ class Converter:
                 hour = game.headers.get("UTCTime") or game.headers["Time"]
 
                 yield GameRecord(
+                    source="fics",
+                    key=game.headers["FICSGamesDBGameNo"],
                     players=Players(
                         white=game.headers["White"],
                         black=game.headers["Black"],

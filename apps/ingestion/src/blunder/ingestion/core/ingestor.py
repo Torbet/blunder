@@ -19,6 +19,7 @@ from blunder.client.models import (
     PipelineConfig,
     Players,
     Result,
+    Source,
     StockfishConfig,
 )
 from blunder.ingestion.core.config import settings
@@ -63,6 +64,8 @@ class Ingestor:
             client=self.client,
             body=[
                 GameCreate(
+                    source=Source(record.source),
+                    key=record.key,
                     result=Result(record.result),
                     players=Players(white=record.players.white, black=record.players.black),
                     elos=Elos(white=record.elos.white, black=record.elos.black),
