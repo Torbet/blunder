@@ -8,12 +8,17 @@ import chess.pgn
 from rich import progress
 
 from blunder.shared.core.records import GameRecord
-from blunder.shared.models.game import Control, Elos, MoveBase, Players, Result
+from blunder.shared.models.game import Color, Control, Elos, LabelBase, MoveBase, Players, Result
 
 RESULTS: dict[str, Result] = {
     "1-0": "white",
     "0-1": "black",
     "1/2-1/2": "draw",
+}
+
+ENGINES: dict[Color, str] = {
+    "white": "WhiteIsComp",
+    "black": "BlackIsComp",
 }
 
 
@@ -24,11 +29,13 @@ class Converter:
                 base, _, increment = game.headers["TimeControl"].partition("+")
                 control = Control(base=float(base), increment=float(increment or 0))
                 clocks = dict.fromkeys(chess.COLORS, control.base)
+                engines = [color for color, key in ENGINES.items() if game.headers.get(key) == "Yes"]
                 turn = game.turn()
 
-                moves = []
+                moves, labels = [], [LabelBase(color=color) for color in engines]
 
                 for ply, node in enumerate(game.mainline()):
+                    color = "white" if turn else "black"
                     clock, time = node.clock(), node.emt()
 
                     if clock is not None:
@@ -42,6 +49,9 @@ class Converter:
                             time=time,
                         )
                     )
+
+                    if color in engines:
+                        labels.append(LabelBase(color=color, ply=ply))
 
                     turn = not turn
 
@@ -61,4 +71,5 @@ class Converter:
                     control=control,
                     played=datetime.fromisoformat(f"{date.replace('.', '-')} {hour}"),
                     moves=moves,
+                    labels=labels,
                 )
