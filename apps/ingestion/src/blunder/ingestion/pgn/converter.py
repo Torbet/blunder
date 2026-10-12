@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 from datetime import datetime
+from itertools import islice
 from pathlib import Path
 
 import chess
@@ -17,9 +18,9 @@ RESULTS: dict[str, Result] = {
 
 
 class Converter:
-    async def convert(self, path: Path) -> AsyncGenerator[GameRecord]:
+    async def convert(self, path: Path, limit: int | None = None) -> AsyncGenerator[GameRecord]:
         with progress.open(path, "r", description="Converting") as f:
-            while game := chess.pgn.read_game(f):
+            for game in islice(iter(lambda: chess.pgn.read_game(f), None), limit):
                 base, _, increment = game.headers["TimeControl"].partition("+")
                 control = Control(base=float(base), increment=float(increment or 0))
                 clocks = dict.fromkeys(chess.COLORS, control.base)

@@ -16,7 +16,7 @@ def ingest() -> None:
 
 
 def convert() -> None:
-    def _command(input: Path, output: Path) -> None:
-        asyncio.run(Records.save(Converter().convert(input), output))
+    def _command(input: Path, output: Path, limit: int | None = None) -> None:
+        asyncio.run(Records.save(Converter().convert(input, limit), output))
 
     typer.run(_command)
