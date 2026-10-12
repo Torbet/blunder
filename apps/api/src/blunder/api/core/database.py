@@ -39,7 +39,6 @@ async def get_session() -> AsyncGenerator[AsyncSession]:
         yield session
 
 
-def load_models():
-    modules = ["analysis", "game"]
-    for module in modules:
+def load_models() -> None:
+    for module in ["analysis", "game"]:
         import_module(f"blunder.api.{module}.models")
