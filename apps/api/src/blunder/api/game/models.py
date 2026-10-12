@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, UniqueConstraint, func
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,9 +22,6 @@ class Game(Base):
 
     played: Mapped[datetime]
 
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
-
     moves: Mapped[list[Move]] = relationship(
         back_populates="game",
         lazy="selectin",
@@ -41,9 +38,6 @@ class Move(Base):
 
     uci: Mapped[str]
     time: Mapped[float | None]
-
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     game: Mapped[Game] = relationship(back_populates="moves")
 
@@ -66,6 +60,3 @@ class Feature(Base):
     win: Mapped[float | None]
     draw: Mapped[float | None]
     loss: Mapped[float | None]
-
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

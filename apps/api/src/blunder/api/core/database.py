@@ -1,11 +1,12 @@
 import json
 from collections.abc import AsyncGenerator
+from datetime import datetime
 from functools import cache
 from importlib import import_module
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, func
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from blunder.api.core.config import settings
 
@@ -20,6 +21,9 @@ class Base(DeclarativeBase):
             "pk": "pk_%(table_name)s",
         }
     )
+
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
 
 @cache
